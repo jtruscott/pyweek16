@@ -77,17 +77,18 @@ class CursorThread(threading.Thread):
             if self.quitEvent.wait(timeout=0.5):
                 break
 
-def init(use_cp437=True):
+def init(use_cp437=True, blink=False):
     pygame.init()
     
     #There are several kinds of event we are patently not interested in
     pygame.event.set_blocked([
-        MOUSEMOTION, MOUSEBUTTONDOWN, MOUSEBUTTONUP,
+        MOUSEBUTTONUP,
         JOYAXISMOTION, JOYBALLMOTION, JOYHATMOTION, JOYBUTTONDOWN, JOYBUTTONUP,
 
         #we only need KEYDOWN
         KEYUP
     ])
+    pygame.mouse.set_visible(False)
 
     #prepare the raw_getkey generator
     prepare_raw_getkey()
@@ -103,9 +104,10 @@ def init(use_cp437=True):
     replaced_character = None
     cursor_type = None
 
-    cursor_thread = CursorThread()
-    cursor_thread.daemon = True
-    cursor_thread.start()
+    if blink:
+        cursor_thread = CursorThread()
+        cursor_thread.daemon = True
+        cursor_thread.start()
 
 def load_sprites():
     if 'bg' in sprites:
@@ -211,14 +213,16 @@ def reset():
     pygame.display.quit()
     global quit
     quit = True
-    cursor_thread.quitEvent.set()
-    cursor_thread.join()
+    if cursor_thread:
+        cursor_thread.quitEvent.set()
+        cursor_thread.join()
 
 def move_cursor(x, y):
     global cursor_x, cursor_y
     restore_character()
     cursor_x = x
     cursor_y = y
+    replace_character()
 
 def set_title(title):
     pygame.display.set_caption(title)
@@ -361,19 +365,30 @@ def prepare_raw_getkey():
     pygame.key.set_repeat(150, 1000 / 15)
 
     global raw_getkey
+
     def translate(event):
-        log.debug("key event: %r", event.dict)
-        if event.key in key_map:
-            return key_map[event.key]
-        return event.unicode
+        if event.type == MOUSEMOTION:
+            x, y = event.pos
+            return ("mouse_motion", x / W, y / H)
+
+        if event.type == KEYDOWN:
+            log.debug("key event: %r", event.dict)
+            if event.key in key_map:
+                return key_map[event.key]
+            return event.unicode
+
+        if event.type == MOUSEBUTTONDOWN:
+            x, y = event.pos
+            return ("mouse_down", x / W, y / H)
 
     def keypump():
         items = []
+        event_types = [MOUSEMOTION, KEYDOWN, MOUSEBUTTONDOWN]
         while True:
             if not items:
-                if pygame.event.peek(KEYDOWN):
+                if pygame.event.peek(event_types):
                     #there's keyboard input pending! great!
-                    items.extend(pygame.event.get(KEYDOWN))
+                    items.extend(pygame.event.get(event_types))
 
                 else:
                     #there's no keyboard input pending, so we need to take a nap until there is.
@@ -387,7 +402,7 @@ def prepare_raw_getkey():
                         item = pygame.event.wait()
                         if item.type == USEREVENT:
                             blink_cursor(item)
-                        elif item.type != KEYDOWN:
+                        elif item.type not in event_types:
                             ignored_items.append(item)
                         else:
                             items.append(item)

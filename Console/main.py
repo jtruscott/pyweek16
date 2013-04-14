@@ -16,6 +16,7 @@ def main():
     pytality.term.init(backends=['pygame'], width=screen_width, height=screen_height)
     
     pytality.term.set_title('No Title Yet (PyWeek #16)')
+    pytality.term.set_cursor_type(2)
     pytality.term.clear()
     try:
         event.fire('setup')

@@ -46,6 +46,9 @@ def start():
                 raise GameShutdown()
 
             event_name = kwargs.pop('type')
+            if event_name == 'mouse_motion':
+                pytality.term.move_cursor(**kwargs)
+
             event.fire('%s.%s' % (mode, event_name), **kwargs)
             event.fire('%s.predraw' % mode)
             event.fire('%s.draw' % mode)
@@ -83,6 +86,8 @@ def tick_loop():
 def input_loop():
     try:
         log.debug("Input thread started")
+        cursor_x = None
+        cursor_y = None
         while True:
             k = pytality.term.getkey()
             if shutdown_event.is_set():
@@ -90,7 +95,17 @@ def input_loop():
                 return
 
             if k:
-                action_queue.put(dict(type='input', key=k.lower()))
+                if type(k) is tuple:
+                    # this is a mouse event
+                    action, x, y = k
+                    if action == 'mouse_motion' and x == cursor_x and y == cursor_y:
+                        # throw it away if there's no "real" movement
+                        continue
+                    cursor_x = x
+                    cursor_y = y
+                    action_queue.put(dict(type=action, x=x, y=y))
+                else:
+                    action_queue.put(dict(type='key', key=k.lower()))
 
     except KeyboardInterrupt as e:
         action_queue.put(Stop)
