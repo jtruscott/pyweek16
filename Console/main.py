@@ -18,6 +18,25 @@ def main():
     pytality.term.set_title('No Title Yet (PyWeek #16)')
     pytality.term.set_cursor_type(2)
     pytality.term.clear()
+
+    if 'load-image' in sys.argv:
+        # hack to view images easily
+        import time
+        import os
+        import pygame
+        while True:
+            print "Updating"
+            with open(sys.argv[-1]) as f:
+                buf = pytality.ansi.read_to_buffer(f, width=155, crop=True)
+            pytality.term.clear()
+            buf.draw()
+            pytality.term.flip()
+            mtime = new_mtime = os.stat(sys.argv[-1]).st_mtime
+            while new_mtime == mtime:
+                pygame.event.pump()
+                time.sleep(0.1)
+                new_mtime = os.stat(sys.argv[-1]).st_mtime
+
     try:
         event.fire('setup')
         game.start()

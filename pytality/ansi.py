@@ -175,9 +175,13 @@ def read_escape(f):
 
     while True:
         c = read()
-        if c not in '01234567890;':
+        if c not in '01234567890;?':
             #we're done parsing arguments
             break
+        if c == '?':
+            #weird escapes do this. whatever.
+            continue
+            
         if c == ';':
             #that's the end of an argument
             #convert it into an int instead of a string
@@ -322,6 +326,10 @@ def parse_escape(f, is_key=False):
     elif command == 'OH': return Escape('home')
     elif command == 'OF': return Escape('end')
 
+    elif command == 'h':
+        #pablodraw makes these - they apparently mean "set screen mode" which means nothing to us.
+        return Escape('ignore', value=command)
+
     log.error("parse_escape: unknown escape sequence. command=%r, args=%r", command, args)
     return Escape('unknown', value=command)
 
@@ -372,7 +380,7 @@ def read_to_buffer(f, width=80, max_height=None, crop=False):
                     fg = esc.fg
                 if esc.bg is not None:
                     bg = esc.bg
-            else:
+            elif esc.meaning != 'ignore':
                 log.warn("read_to_buffer: ignoring unknown meaning %r. This is probably bad.", esc.meaning)
 
         elif c in ('\r','\n'):
