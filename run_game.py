@@ -1,3 +1,3 @@
-import Console.__main__
+import Console.main
 if __name__ == "__main__":
-    Console.__main__.main()
+    Console.main.main()

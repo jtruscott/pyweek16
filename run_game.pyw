@@ -1,3 +1,3 @@
-import yourgameshortname.main
+import Console.main
 if __name__ == "__main__":
-    yourgameshortname.main.main()
+    Console.main.main()
