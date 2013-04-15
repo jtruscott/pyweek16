@@ -181,7 +181,7 @@ def read_escape(f):
         if c == '?':
             #weird escapes do this. whatever.
             continue
-            
+
         if c == ';':
             #that's the end of an argument
             #convert it into an int instead of a string
@@ -248,9 +248,10 @@ def parse_escape(f, is_key=False):
                 #0 means we want to disable bold
                 #but removing bold sets the background to black!? wtf?
                 #I don't make the rules around here.
+                #pablodraw also things the foregound color should reset too
                 bold = 0
                 log.debug("parse_escape: un-bolding")
-                fg = lookup_color(bold, None)
+                fg = term.colors.DARKGREY
                 bg = term.colors.BLACK
 
             elif 30 <= arg <= 37:
@@ -328,7 +329,8 @@ def parse_escape(f, is_key=False):
 
     elif command == 'h':
         #pablodraw makes these - they apparently mean "set screen mode" which means nothing to us.
-        return Escape('ignore', value=command)
+        # but it seems they're intended to reset the color too.
+       return Escape('color', fg=0, bg=0)
 
     log.error("parse_escape: unknown escape sequence. command=%r, args=%r", command, args)
     return Escape('unknown', value=command)

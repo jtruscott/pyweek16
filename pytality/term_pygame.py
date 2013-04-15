@@ -138,14 +138,17 @@ def replace_character():
 
     fg, bg, ch = get_at(cursor_x, cursor_y)
     replaced_character = (cursor_x, cursor_y, fg, bg, ch)
-
-    blit_at(cursor_x, cursor_y, 7, bg, cursor_type)
+    new_fg = 15
+    if bg == 15:
+        new_fg = 7
+    blit_at(cursor_x, cursor_y, new_fg, bg, cursor_type)
     pygame.display.flip()
 
 def restore_character():
     global replaced_character
     if not replaced_character:
         return
+
     x, y, fg, bg, ch = replaced_character
     blit_at(x, y, fg, bg, ch)
     pygame.display.flip()

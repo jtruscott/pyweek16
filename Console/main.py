@@ -2,6 +2,7 @@ import pytality
 import event
 import game
 import sys
+import traceback
 import logging
 
 log = logging.getLogger(__name__)
@@ -33,9 +34,17 @@ def main():
             pytality.term.flip()
             mtime = new_mtime = os.stat(sys.argv[-1]).st_mtime
             while new_mtime == mtime:
+                if pygame.event.peek(pygame.locals.QUIT):
+                    sys.exit(0)
                 pygame.event.pump()
                 time.sleep(0.1)
                 new_mtime = os.stat(sys.argv[-1]).st_mtime
+
+    if 'test' in sys.argv:
+        sys.argv.remove('test')
+        import importlib
+        import unittest
+        unittest.main(importlib.import_module('Console.%s' % sys.argv[-1]), argv=['Test'])
 
     try:
         event.fire('setup')
@@ -49,6 +58,7 @@ def main():
         raise
     except Exception, e:
         log.exception(e)
+        traceback.print_exc(e, file=sys.stderr)
         raise
 
     finally:

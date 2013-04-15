@@ -6,6 +6,7 @@ import os
 import threading
 import traceback
 import sys
+import clickable
 import logging
 
 log = logging.getLogger(__name__)
@@ -47,6 +48,10 @@ def start():
 
             event_name = kwargs.pop('type')
             if event_name == 'mouse_motion':
+                clickable.mouse_move(**kwargs)
+                pytality.term.move_cursor(**kwargs)
+            if event_name == 'mouse_down':
+                clickable.mouse_down(**kwargs)
                 pytality.term.move_cursor(**kwargs)
 
             event.fire('%s.%s' % (mode, event_name), **kwargs)
@@ -111,6 +116,10 @@ def input_loop():
         action_queue.put(Stop)
 
     except Exception as e:
+        if shutdown_event.is_set():
+            logging.warn("Got an error but was already supposed to shutdown, whatever")
+            return
+            
         logging.exception(e)
         try:
             traceback.print_exc(e, file=sys.stderr)
