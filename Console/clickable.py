@@ -9,17 +9,22 @@ buffers = set()
 hovered = None
 
 def register(buf):
+    log.debug("registering %r", buf)
     buffers.add(buf)
 
 def unregister(buf):
-    buffers.discard(buf)
+    log.debug("unregistering %r", buf)
+    buffers.remove(buf)
+    global hovered
+    if buf == hovered:
+        hovered = None
 
 
 def mouse_move(x, y):
     global hovered
     for buf in buffers:
         if buf._x <= x < (buf._x + buf.width) and buf._y <= y < (buf._y + buf.width):
-            print 'hovered', hovered, 'buf', buf
+            #print 'hovered', hovered, 'buf', buf
             if hovered != buf:
                 if hovered:
                     hovered.mouse_out(x, y)
@@ -61,28 +66,41 @@ class ClickableBox(pytality.buffer.Box):
         self._hover_data = pytality.buffer.Box(**kwargs)._data
 
     def mouse_in(self, x, y):
-        print 'in', self, x, y
+        #print 'in', self, x, y
         self._data = self._hover_data
         self.dirty = True
 
     def mouse_out(self, x, y):
-        print 'out', self, x, y
+        #print 'out', self, x, y
         self._data = self._regular_data
         self.dirty = True
 
     def mouse_down(self, x, y):
-        print 'down', self, x, y
+        #print 'down', self, x, y
+        pass
 
 
-@event.on('setup')
-def on_setup():
-    global p, p2
-    p = ClickableBox(x=10, y=20, width=10, height=5, border_fg=pytality.colors.DARKGREY)
-    p2 = ClickableBox(x=20, y=20, width=5, height=5, border_fg=pytality.colors.DARKGREY, hover_border_bg=pytality.colors.WHITE)
-    register(p)
-    register(p2)
 
-@event.on('level.draw')
-def on_draw():
-    p.draw()
-    p2.draw()
+
+import unittest
+class Test(unittest.TestCase):
+    def test_buttons(self):
+        import game
+        game.mode = 'test'
+        p = ClickableBox(x=10, y=20, width=10, height=5, border_fg=pytality.colors.DARKGREY)
+        p2 = ClickableBox(x=20, y=20, width=5, height=5, border_fg=pytality.colors.DARKGREY, hover_border_bg=pytality.colors.WHITE)
+        register(p)
+        register(p2)
+
+        def mouse_down(x, y):
+            p2.mouse_out(x, y)
+            unregister(p2)
+        p2.mouse_down = mouse_down
+        
+        @event.on('test.draw')
+        def on_draw():
+            p.draw()
+            p2.draw()
+
+        game.start()
+
