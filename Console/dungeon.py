@@ -96,7 +96,8 @@ class Dungeon(object):
             height=bottom_height,
             x=sidebar_width,
             y=main.screen_height - bottom_height,
-         border_fg=pytality.colors.LIGHTGREY,
+            border_fg=pytality.colors.LIGHTGREY,
+            dungeon=self,
         )
         self.level = generate_level(
             10,

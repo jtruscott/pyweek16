@@ -16,7 +16,36 @@ effect_text = dict(
     durable=dict(message="RESISTANCE", fg=pytality.colors.BROWN)
 )
 
-class MonsterCard(clickable.ClickableBox):
+class Monster(object):
+    defeated = False
+    stage = -1
+    hp = 4
+
+    def battle_tick(self, hero_sprite, monster_sprite):
+        #print self.hp, self.stage
+        if self.stage == 0:
+            hero_sprite.set_at(0, 0, fg=pytality.colors.DARKGREY)
+
+        elif self.stage < 3:
+            hero_sprite.set_at(0, 0, fg=pytality.colors.WHITE)
+
+        elif self.stage < 6:
+            pass
+
+        elif self.stage == 6:
+            monster_sprite.set_at(0, 0, fg=pytality.colors.RED)
+
+        elif self.stage < 9:
+            monster_sprite.set_at(0, 0, fg=pytality.colors.LIGHTRED)
+
+        else:
+            self.hp -= 1
+            self.stage = -1
+            if not self.hp:
+                self.defeated = True
+        self.stage += 1
+
+class MonsterCard(clickable.ClickableBox, Monster):
     def __init__(self, parent=None, **kwargs):
         self.portrait = data.load_buffer(self.art_file, width=14, crop=True)
 
@@ -41,6 +70,8 @@ class MonsterCard(clickable.ClickableBox):
             return
 
         if self.mode != "fading_out":
+            if self.parent and not self.parent.card_clicked(self):
+                return
             self.overlay.start("fade_out")
             self.mode = "fading_out"
         else:
@@ -106,11 +137,12 @@ class CardDisplay(pytality.buffer.Box):
     card_delay = 5
     slots = 6
 
-    def __init__(self, **kwargs):
+    def __init__(self, dungeon=None, **kwargs):
         super(CardDisplay, self).__init__(
             draw_bottom=False, draw_left=False, draw_right=False, padding_x=0,
             **kwargs
         )
+        self.dungeon = dungeon
         self.next_card_in = 0
         self.cards = [None] * self.slots
 
@@ -119,9 +151,10 @@ class CardDisplay(pytality.buffer.Box):
         self.children.append(self.title)
 
     def tick(self):
-        if self.next_card_in:
-            # dont finish the timer if we're full
-            if self.next_card_in > 2 or None in self.cards:
+        if self.next_card_in and not self.dungeon.level.active_monster:
+            # and don't interact with the timer in combat
+            # dont quite finish the timer if we're full
+            if self.next_card_in > 5 or None in self.cards:
                 self.next_card_in -= 1
 
         if self.next_card_in <= 0 and None in self.cards:
@@ -138,6 +171,13 @@ class CardDisplay(pytality.buffer.Box):
         for card in self.cards:
             if card:
                 card.tick()
+
+    def card_clicked(self, card):
+        if self.dungeon.level.active_monster:
+            return False
+
+        self.dungeon.level.start_battle_with(card)
+        return True
 
     def after_fade_out(self, card):
         clickable.unregister(card)

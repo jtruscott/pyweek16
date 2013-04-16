@@ -175,13 +175,23 @@ class Level(pytality.buffer.Buffer):
 
         self.view_buffer = pytality.buffer.BufferView(parent=self.main_buf, width=self.width, height=self.height)
         self.hero_sprite = pytality.buffer.PlainText("\x01", fg=pytality.colors.WHITE)
+        self.monster_sprite = pytality.buffer.PlainText("\x01", fg=pytality.colors.LIGHTRED, is_invisible=True)
         self.hero_location = self.begin_location
-        self.children = [self.view_buffer, self.hero_sprite]
+        self.monster_location = (0, 0)
+        self.active_monster = None
+        self.children = [self.view_buffer, self.hero_sprite, self.monster_sprite]
 
     def tick(self):
-        if self.move_path:
-            self.hero_location = self.move_path.pop(0)
-            self.center_map_on_hero()
+        if not self.active_monster:
+            if self.move_path:
+                self.hero_location = self.move_path.pop(0)
+                self.center_map_on_hero()
+        else:
+            self.active_monster.battle_tick(self.hero_sprite, self.monster_sprite)
+            if self.active_monster.defeated:
+                self.active_monster = None
+                self.monster_sprite.is_invisible = True
+                self.dirty = True
 
     def center_map_on_hero(self):
         map_x, map_y = self.hero_location
@@ -189,6 +199,18 @@ class Level(pytality.buffer.Buffer):
         self.view_buffer._view_y = max(0, map_y - (self.view_buffer.height / 2))
         self.hero_sprite.x = (map_x - self.view_buffer._view_x)
         self.hero_sprite.y = (map_y - self.view_buffer._view_y)
+
+        monster_x, monster_y = self.monster_location
+        self.monster_sprite.x = (monster_x - self.view_buffer._view_x)
+        self.monster_sprite.y = (monster_y - self.view_buffer._view_y)
+        self.dirty = True
+
+    def start_battle_with(self, monster):
+        self.monster_location = monster_x, monster_y = self.move_path[0]
+        self.monster_sprite.x = (monster_x - self.view_buffer._view_x)
+        self.monster_sprite.y = (monster_y - self.view_buffer._view_y)
+        self.monster_sprite.is_invisible = False
+        self.active_monster = monster
         self.dirty = True
 
 import unittest
