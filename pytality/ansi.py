@@ -105,6 +105,7 @@ color_map = {
 #around for color switching and bold toggling
 last_color = 37
 bold = 0
+bg_bold = 0
 
 def lookup_color(bold, idx=None):
     global last_color
@@ -206,6 +207,7 @@ def parse_escape(f, is_key=False):
         (Christ, I hate this "syntax")
     '''
     global bold
+    global bg_bold
         
     #read the escape sequence
     data = read_escape(f)
@@ -237,21 +239,24 @@ def parse_escape(f, is_key=False):
         #m: colorize things
         fg = None
         bg = None
+        handled_bold = False
         for arg in args:
             if arg == 1:
                 #1 means we want to enable bold foreground colors (only)
+                #unless we're using an extension that bolds background colors
                 bold = 1
                 log.debug("parse_escape: bolding")
                 fg = lookup_color(bold, None)
 
             elif arg == 0:
-                #0 means we want to disable bold
+                #0 means we want to reset everything
                 #but removing bold sets the background to black!? wtf?
                 #I don't make the rules around here.
                 #pablodraw also things the foregound color should reset too
                 bold = 0
-                log.debug("parse_escape: un-bolding")
-                fg = term.colors.DARKGREY
+                bg_bold = 0
+                log.debug("parse_escape: resetting colors")
+                fg = lookup_color(bold, 37)
                 bg = term.colors.BLACK
 
             elif 30 <= arg <= 37:
@@ -330,7 +335,7 @@ def parse_escape(f, is_key=False):
     elif command == 'h':
         #pablodraw makes these - they apparently mean "set screen mode" which means nothing to us.
         # but it seems they're intended to reset the color too.
-       return Escape('color', fg=0, bg=0)
+       return Escape('ignore')
 
     log.error("parse_escape: unknown escape sequence. command=%r, args=%r", command, args)
     return Escape('unknown', value=command)

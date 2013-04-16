@@ -4,18 +4,15 @@ import pytality
 from room import Room, Level
 import random
 import logging
+import data
 
 log = logging.getLogger(__name__)
 
-data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
-
 room_map = collections.defaultdict(list)
-for file_name in os.listdir(data_dir):
+for file_name in os.listdir(data.data_dir):
     if 'room-' in file_name:
         prefix, directions, suffix = file_name.split('-', 2)
-
-        with open(os.path.join(data_dir, file_name)) as f:
-            room_buf = pytality.ansi.read_to_buffer(f, width=155, crop=True)
+        room_buf = data.load_buffer(file_name, width=155, crop=True)
         room = Room(buf=room_buf, directions=directions, file_name=file_name)
         room_map[frozenset(directions)].append(room)
 

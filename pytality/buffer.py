@@ -21,7 +21,7 @@ class Buffer(object):
                 data=None,
                 x=0, y=0,
                 padding_x=0, padding_y=0,
-                children=None):
+                children=None, is_overlay=False, is_invisible=False):
         """
         Create a screen buffer.
         Mandatory arguments:
@@ -71,6 +71,8 @@ class Buffer(object):
         self._x = x
         self._y = y
         self.dirty = True
+        self.is_overlay = is_overlay
+        self.is_invisible = is_invisible
 
         self.children = children or []
 
@@ -125,7 +127,7 @@ class Buffer(object):
 
         #log.debug("%r dirty=%r, x_offset=%r, y_offset=%r", self, dirty, x_offset, y_offset)
         #put ourselves on the screen
-        if dirty:
+        if dirty and not self.is_invisible:
             term.draw_buffer(self, x_offset, y_offset)
 
         #have our children do similar

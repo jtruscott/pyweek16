@@ -302,6 +302,7 @@ def draw_buffer(source, start_x, start_y):
     local_W, local_H = W, H
     screen_width, screen_height = max_x, max_y
     source_width = source.width
+    is_overlay = source.is_overlay
 
     for row in source._data:
         if y < 0:
@@ -323,7 +324,7 @@ def draw_buffer(source, start_x, start_y):
                 old_data = local_cell_data[y][x]
                 new_data = [fg, bg, ch]
 
-                if new_data != old_data:
+                if new_data != old_data and not (is_overlay and ch == ' '):
                     #draw it and remember the info for our cache
                     #this used to call blit_at but now it's inline.
                     try:

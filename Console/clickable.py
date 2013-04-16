@@ -66,12 +66,12 @@ class ClickableBox(pytality.buffer.Box):
         self._hover_data = pytality.buffer.Box(**kwargs)._data
 
     def mouse_in(self, x, y):
-        #print 'in', self, x, y
+        print 'in', self, x, y
         self._data = self._hover_data
         self.dirty = True
 
     def mouse_out(self, x, y):
-        #print 'out', self, x, y
+        print 'out', self, x, y
         self._data = self._regular_data
         self.dirty = True
 
