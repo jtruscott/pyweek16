@@ -135,8 +135,9 @@ class Room(object):
         return '<Room name="%s" directions="%s">' % (self.file_name, self.directions)
 
 
-class Level(object):
-    def __init__(self, room_map, room_list):
+class Level(pytality.buffer.Buffer):
+    def __init__(self, room_map, room_list, **kwargs):
+        super(Level, self).__init__(**kwargs)
         min_x = max_x = min_y = max_y = 0
         for x, y in room_map:
             min_x = min(x, min_x)
@@ -172,9 +173,23 @@ class Level(object):
                 y = tile.y + start_y
                 self.move_path.append((x, y))
 
-        self.buf = pytality.buffer.BufferView(width=100, height=60, parent=self.main_buf)
+        self.view_buffer = pytality.buffer.BufferView(parent=self.main_buf, width=self.width, height=self.height)
+        self.hero_sprite = pytality.buffer.PlainText("\x01", fg=pytality.colors.WHITE)
+        self.hero_location = self.begin_location
+        self.children = [self.view_buffer, self.hero_sprite]
 
+    def tick(self):
+        if self.move_path:
+            self.hero_location = self.move_path.pop(0)
+            self.center_map_on_hero()
 
+    def center_map_on_hero(self):
+        map_x, map_y = self.hero_location
+        self.view_buffer._view_x = max(0, map_x - (self.view_buffer.width / 2))
+        self.view_buffer._view_y = max(0, map_y - (self.view_buffer.height / 2))
+        self.hero_sprite.x = (map_x - self.view_buffer._view_x)
+        self.hero_sprite.y = (map_y - self.view_buffer._view_y)
+        self.dirty = True
 
 import unittest
 class Test(unittest.TestCase):

@@ -20,6 +20,7 @@ class Buffer(object):
     def __init__(self, width, height,
                 data=None,
                 x=0, y=0,
+                x_offset=0, y_offset=0,
                 padding_x=0, padding_y=0,
                 children=None, is_overlay=False, is_invisible=False):
         """
@@ -38,7 +39,7 @@ class Buffer(object):
             of [fg, bg, character] lists.
 
             If not present, it will be initialized as blank cells (black, black, ' ')
-        
+
         x:
         y:
             The X/Y offset to use when drawing, relative to the parent buffer,
@@ -55,7 +56,7 @@ class Buffer(object):
 
         children:
             A list of child buffers to draw after this buffer is drawn.
-            
+
         """
         self.width = width
         self.height = height
@@ -65,9 +66,11 @@ class Buffer(object):
         else:
             self._data = data
         self._check_data()
-        
+
         self.padding_x = padding_x
         self.padding_y = padding_y
+        self.x_offset = x_offset
+        self.y_offset = y_offset
         self._x = x
         self._y = y
         self.dirty = True
@@ -142,7 +145,7 @@ class Buffer(object):
                 row.append([term.colors.BLACK, term.colors.BLACK, ' '])
             rows.append(row)
         self._data = rows
-    
+
     def _check_data(self):
         """
         Prevent creating a data buffer which is malformed.
@@ -160,7 +163,7 @@ class Buffer(object):
                 raise ValueError("Buffer data rows must be lists (not a %r)" % type(row))
             if len(row) < self.width:
                 raise ValueError("Buffer data row has %r cells, but a specified width of %r" % (len(row), self.width))
-            
+
             for cell in row:
                 if not isinstance(cell, collections.MutableSequence):
                     raise ValueError("Buffer data cells must be lists (not a %r)" % type(cell))
@@ -190,7 +193,7 @@ class BaseText(Buffer):
     def set(self, message):
         self.message = self.base_message = message
         self.update_data()
-    
+
     def format(self, fmt):
         #log.debug("formatting: (%r) into (%r)", fmt, self.base_message)
         self.message = self.base_message % fmt
@@ -199,7 +202,7 @@ class BaseText(Buffer):
     def update_data(self):
         """
         'render' the current message into buffer data.
-        
+
         This function is expected to set self.width, self.height, self._data,
         and possibly set self.dirty.
         """
@@ -222,7 +225,7 @@ class PlainText(BaseText):
 
         center_to:
             Center the text to N characters in width
-            
+
         max_width:
             Crop the text at N characters in length
         """
@@ -240,10 +243,10 @@ class PlainText(BaseText):
         msg = self.message
         if self.center_to:
             msg = msg.center(self.center_to)
-        
+
         if self.max_width:
             msg = msg[:self.max_width]
-        
+
         for c in msg:
            row.append([self.fg, self.bg, c])
 
@@ -291,7 +294,7 @@ class RichText(BaseText):
         rows = []
         row = []
         message_parts = self.parse()
-        
+
         #build
         for part_color, part_text in message_parts:
             for c in part_text:
@@ -300,7 +303,7 @@ class RichText(BaseText):
                     row = []
                     continue
                 row.append([part_color, self.bg, c])
-        
+
         rows.append(row)
 
         #wrap
@@ -325,8 +328,8 @@ class RichText(BaseText):
         for row in rows:
             while len(row) < width:
                 row.append([self.bg, self.bg, ' '])
-        
-        
+
+
         #finish
         self.width = width
         self.height = len(rows)
@@ -372,13 +375,13 @@ class Box(Buffer):
         width:
         height:
             The outer dimensions of the box, including the border.
-        
+
         border_fg:
         border_bg:
         interior_fg:
         interior_bg:
             The colors to use for the box's border and interior, respectively.
-        
+
         boxtype:
             A BoxType object with properties for the various border characters.
 
@@ -398,7 +401,7 @@ class Box(Buffer):
         self.draw_top, self.draw_bottom = draw_top, draw_bottom
         self.draw_left, self.draw_right = draw_left, draw_right
         data = []
-        
+
         #break out the boxtype constants we've been given
         blank, horiz, vert, tl, tr, bl, br = (boxtype.blank, boxtype.horiz, boxtype.vert, boxtype.tl, boxtype.tr, boxtype.bl, boxtype.br)
 
@@ -412,7 +415,7 @@ class Box(Buffer):
         left_cell = [border_fg, border_bg, vert]
         interior_cell = [interior_fg, interior_bg, blank]
         right_cell = [border_fg, border_bg, vert]
-        
+
         #override sides we aren't drawing
         #(note that skipping 'top' and 'bottom' simply draws one more interior row
         if not draw_left:
@@ -468,12 +471,12 @@ class MessageBox(Box):
                 scrollbar_type="edge", scrollbar_fg_color=term.colors.WHITE,
                 auto_scroll=True,
                 **kwargs):
-        
+
         Box.__init__(self,
             width=width, height=height,
             padding_x=padding_x, padding_y=padding_y,
             **kwargs)
-        
+
         self.messages = []
         self.offset = 0
         self.auto_scroll = auto_scroll
@@ -491,7 +494,7 @@ class MessageBox(Box):
         #'partial' message buffers for linewrapped messages
         self.top_partial_message = Buffer(self.inner_width, 1)
         self.bottom_partial_message = Buffer(self.inner_width, 1)
-        
+
         #update our positioning
         self.scroll(home=True)
 
@@ -532,7 +535,7 @@ class MessageBox(Box):
         #maximum the last line on the screen
         if offset + self.inner_height > total_lines:
             offset = total_lines - self.inner_height
-        
+
         #minimum 0
         if offset < 0:
             offset = 0
@@ -576,12 +579,12 @@ class MessageBox(Box):
 
                 else:
                     #and it also crosses the bottom!
-                    make_partial_message(message, self.top_partial_message, 
+                    make_partial_message(message, self.top_partial_message,
                                         start=(message.height - (bottom - top_offset)), end=(bottom_offset - lineno), y=0)
 
             elif bottom > bottom_offset > lineno:
                 #this message crosses the bottom edge - we need to split it
-                make_partial_message(message, self.top_partial_message, 
+                make_partial_message(message, self.top_partial_message,
                                     end=(bottom_offset - lineno), y=(lineno - top_offset))
 
             else:
@@ -596,7 +599,7 @@ class MessageBox(Box):
                     if bottom > bottom_offset:
                         #no further messages will be appearing
                         break
-                    
+
             lineno = bottom
 
         #update the scroll cursor
@@ -616,7 +619,7 @@ class Scrollbar(PlainText):
 class NoScrollbar(Scrollbar):
     def __init__(self):
         PlainText.__init__(self, '')
-        
+
     def reposition(self, *args):
         self.height = 0
         self.width = 0
@@ -663,13 +666,13 @@ class BlockScrollbar(Scrollbar):
             self.width = 0
             self.y = 0
             return
-           
+
         top_pct = (float(top_offset) / message_height)
         top_y = top_pct * (viewport.inner_height)
 
         bottom_pct = (float(bottom_offset) / message_height)
         bottom_y = bottom_pct * (viewport.inner_height)
-        
+
         self.y = int(math.floor(top_y))
         self.height = int(math.ceil(bottom_y) - math.floor(top_y))
         self.width = 1
@@ -682,12 +685,12 @@ class BlockScrollbar(Scrollbar):
 
         for i in range(self.height-2):
             data.append([[self.fg, self.bg, self.boxtype.scrollbar_center_block]])
-        
+
         if (bottom_y % 1) < 0.5:
             data.append([[self.fg, self.bg, self.boxtype.scrollbar_top_block]])
         else:
             data.append([[self.fg, self.bg, self.boxtype.scrollbar_center_block]])
-        
+
         self._data = data
 
 #-----------------------------------------------------------------------------
@@ -758,16 +761,16 @@ class BufferView(Buffer):
             super(BufferView.RowIterator, self).__init__()
             self.buf = buf
             self.idx = -1
-        
+
         def next(self):
             self.idx += 1
             row_idx = self.buf._view_y + self.idx
-            if row_idx < self.buf.parent.height and row_idx < len(self.buf.parent._data):
+            if self.idx < self.buf.height and row_idx < self.buf.parent.height and row_idx < len(self.buf.parent._data):
                 val = self.buf.parent._data[row_idx]
                 return BufferView.CellIterator(self.buf, val)
             else:
                 raise StopIteration()
-   
+
     class CellIterator(collections.Iterator):
         def __init__(self, buf, row):
             super(BufferView.CellIterator, self).__init__()
@@ -776,7 +779,7 @@ class BufferView(Buffer):
             self.idx = -1
             self.start = 0
             self.end = len(self.row)
-        
+
         def next(self):
             self.idx += 1
             cell_idx = self.start + self.buf._view_x + self.idx

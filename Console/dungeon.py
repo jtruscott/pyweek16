@@ -5,6 +5,11 @@ from room import Room, Level
 import random
 import logging
 import data
+import main
+import hero
+import message
+import monsters
+import event
 
 log = logging.getLogger(__name__)
 
@@ -22,8 +27,8 @@ next_deltas = dict(
     w=('e', -1, 0),
     e=('w', 1, 0),
 )
-def generate_level(size):
-    print 'room_map:', room_map
+def generate_level(size, **kwargs):
+    log.debug("Generating level")
     start_room = random.choice(random.choice([room for key, room in room_map.iteritems() if len(key) == 1]))
     room_count = random.randint(size-2, size+2)
     x = 0
@@ -36,7 +41,6 @@ def generate_level(size):
     exit_direction = start_room.directions
     done = False
     for i in range(room_count):
-        print 'i:', i
         entrance_direction, dx, dy = next_deltas[exit_direction]
         x += dx
         y += dy
@@ -46,46 +50,105 @@ def generate_level(size):
             if (x + dx, y + dy) in rooms and direction != entrance_direction:
                 walled_directions.add(direction)
 
-        print 'entrance_direction:', entrance_direction
         choices = []
         for key in room_map:
             if entrance_direction in key and len(key) > 1 and not key.intersection(walled_directions).difference(entrance_direction):
                 choices.extend(room_map[key])
 
-        print 'walled_directions:', walled_directions
-        print 'choices:', choices
         if i == room_count - 1 or not choices:
             # this is the last room
             choice = random.choice(room_map[frozenset(entrance_direction)])
             done = True
             exit_direction = None
-            end_room_location = (x, y)
+
         else:
             choice = random.choice(choices)
             exit_direction = choice.directions.replace(entrance_direction, '')
 
-        print 'choice:', choice, choice.directions
+        log.debug("chose room %r at x %r y %r", choice, x, y)
         rooms[(x, y)] = choice
         room_list.append((choice, x, y, entrance_direction))
 
         if done:
             break
 
-    print 'rooms:', rooms
-    print 'room_list:', room_list
-    print 'end:', end_room_location
+    log.debug("Done! room_list=%r", room_list)
 
-    return Level(rooms, room_list)
+    return Level(rooms, room_list, **kwargs)
+
+class Dungeon(object):
+    def __init__(self):
+        sidebar_width = 26
+        bottom_height = 17
+        self.message_log = message.MessageLog(
+            width=sidebar_width,
+            height=main.screen_height,
+            draw_left=False, border_fg=pytality.colors.LIGHTGREY,
+        )
+        self.stat_display = hero.StatDisplay(
+            width=sidebar_width,
+            x=main.screen_width - sidebar_width,
+            height=main.screen_height,
+            draw_right=False, border_fg=pytality.colors.LIGHTGREY,
+        )
+        self.card_display = monsters.CardDisplay(
+            width=main.screen_width - sidebar_width * 2,
+            height=bottom_height,
+            x=sidebar_width,
+            y=main.screen_height - bottom_height,
+         border_fg=pytality.colors.LIGHTGREY,
+        )
+        self.level = generate_level(
+            10,
+            x=sidebar_width,
+            width=main.screen_width - sidebar_width * 2,
+            height=main.screen_height - self.card_display.height
+        )
+        self.root = pytality.buffer.Buffer(height=0, width=0, children=[
+            self.stat_display,
+            self.message_log,
+            self.card_display,
+            self.level
+        ])
+        self.i = 0
+
+    def tick(self):
+        self.i += 1
+        if self.i % 15 == 0:
+            # safety margin
+            self.root.dirty = True
+
+        self.card_display.tick()
+        self.level.tick()
+
+    def draw(self):
+        self.root.draw()
+
+active_dungeon = None
+
+@event.on("dungeon.setup")
+def dungeon_setup():
+    global active_dungeon
+    active_dungeon = Dungeon()
+
+@event.on("dungeon.tick")
+def dungeon_tick():
+    active_dungeon.tick()
+
+@event.on("dungeon.draw")
+def dungeon_draw():
+    active_dungeon.draw()
+
 
 import unittest
 class Test(unittest.TestCase):
     def test_generate(self):
-        level = generate_level(10)
+        level = generate_level(10, width=100, height=60)
         self.assertTrue(level)
 
         for i, (x, y) in enumerate(level.move_path):
             level.main_buf._data[y][x] = [[8, 7, 15][(i/10) % 3], 0, '1234567890'[i%10]]
-            level.buf.view_x = (x - 40)
-            level.buf.view_y = (y - 40)
-            level.buf.draw()
+            level.view_buffer.view_x = (x - 40)
+            level.view_buffer.view_y = (y - 40)
+            level.view_buffer.draw()
             pytality.term.flip()

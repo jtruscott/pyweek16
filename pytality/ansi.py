@@ -12,7 +12,7 @@ class Escape(object):
         Container for an ANSI escape sequence.
         These can be used both for 'drawing' and keyboard input.
 
-        
+
         meaning:
             a short string indicating what the escape wants to do.
             Other information will be provided based upon the contents of this field.
@@ -34,7 +34,7 @@ class Escape(object):
             unknown:
                 the parser didn't know what this sequence was.
                 <value> will be the escape command
-                    
+
             invalid:
                 the parser thinks this sequence was illegal
                 <value> will be the full escape sequence that was provided.
@@ -55,9 +55,9 @@ class Escape(object):
         is_key:
             if this is True, the escape sequence is known to represent
             a keypress.
-            
 
-        
+
+
     '''
     def __init__(self, meaning='unknown',args=None,
                 value=None, fg=None, bg=None):
@@ -76,9 +76,9 @@ class Escape(object):
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'enter',
             'esc',
         ):
-            self.is_key = True 
+            self.is_key = True
         else:
-            self.is_key = False        
+            self.is_key = False
 
 #Mapping of the ANSI escape color codes to pytality.term colors
 color_map = {
@@ -110,7 +110,7 @@ bg_bold = 0
 def lookup_color(bold, idx=None):
     global last_color
     log.debug('lookup_color: bold=%r, idx=%r, last_color=%r' % (bold, idx, last_color))
-   
+
     if idx is None:
         #When changing bold state, the actual color is not provided
         idx = last_color
@@ -135,7 +135,7 @@ def read_escape(f):
 
         Returns either an Escape object (if something went wrong), or (args, command identifier)
     '''
-    
+
     all_chars = []
     def read():
         '''
@@ -157,7 +157,7 @@ def read_escape(f):
         #but we can just read another character and call that the command. not awful.
         c = c + read()
         return ([], c)
-    
+
     elif c == '\x1b':
         #hitting ESC twice produces this. That's still a key.
         return Escape('esc')
@@ -201,14 +201,14 @@ def parse_escape(f, is_key=False):
         Read and parse an ANSI escape codefrom a file-like object.
         It is expected that you call this function after
         reading the chr(27) prelude marker.
-        
+
         Returns an Escape instance.
 
         (Christ, I hate this "syntax")
     '''
     global bold
     global bg_bold
-        
+
     #read the escape sequence
     data = read_escape(f)
     if isinstance(data, Escape):
@@ -231,7 +231,7 @@ def parse_escape(f, is_key=False):
     elif command == 'B': return Escape('down', value=optional_arg())
     elif command == 'C': return Escape('right', value=optional_arg())
     elif command == 'D': return Escape('left', value=optional_arg())
-    
+
     elif command == 'H': return Escape('home')
     elif command == 'F': return Escape('end')
 
@@ -271,7 +271,7 @@ def parse_escape(f, is_key=False):
                 bg = lookup_color(0, arg)
 
         return Escape('color', fg=fg, bg=bg)
-    
+
     elif command == '~':
         idx = optional_arg(None)
         #Function key escapes
@@ -299,10 +299,10 @@ def parse_escape(f, is_key=False):
         if idx == 6: return Escape('pgdn')
         if idx == 7: return Escape('home')
         if idx == 8: return Escape('end')
-    
+
     # 'O' escapes are decently documented at
     # http://www.connectrf.com/documents/vt220.html
-    
+
     elif command == 'OP': return Escape('f1')
     elif command == 'OQ': return Escape('f2')
     elif command == 'OR': return Escape('f3')
@@ -327,14 +327,18 @@ def parse_escape(f, is_key=False):
     elif command == 'OB': return Escape('down', value=optional_arg())
     elif command == 'OC': return Escape('right', value=optional_arg())
     elif command == 'OD': return Escape('left', value=optional_arg())
-    
+
     #I saw these on evilvte and can't find any proof
     elif command == 'OH': return Escape('home')
     elif command == 'OF': return Escape('end')
 
     elif command == 'h':
         #pablodraw makes these - they apparently mean "set screen mode" which means nothing to us.
-        # but it seems they're intended to reset the color too.
+       return Escape('ignore')
+
+    elif command == 't':
+        # pablodraw has made these. they have a lot of arguments and I cannot find _ANYWHERE_ documenting them.
+        # and they don't seem to mess up the image, either? I'm at a loss.
        return Escape('ignore')
 
     log.error("parse_escape: unknown escape sequence. command=%r, args=%r", command, args)

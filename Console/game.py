@@ -7,6 +7,7 @@ import threading
 import traceback
 import sys
 import clickable
+import dungeon
 import logging
 
 log = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ action_queue = queue.Queue()
 tick_thread = None
 shutdown_event = threading.Event()
 
-mode = "level"
+mode = "dungeon"
 
 def start():
     log.debug("Starting Game")
@@ -40,6 +41,7 @@ def start():
     input_thread.daemon = True
     input_thread.start()
 
+    event.fire("dungeon.setup")
     try:
         while True:
             kwargs = action_queue.get()

@@ -23,7 +23,7 @@ def unregister(buf):
 def mouse_move(x, y):
     global hovered
     for buf in buffers:
-        if buf._x <= x < (buf._x + buf.width) and buf._y <= y < (buf._y + buf.width):
+        if (buf._x + buf.x_offset) <= x < (buf._x + buf.x_offset + buf.width) and (buf._y + buf.y_offset) <= y < (buf._y + buf.y_offset + buf.width):
             #print 'hovered', hovered, 'buf', buf
             if hovered != buf:
                 if hovered:
@@ -35,7 +35,7 @@ def mouse_move(x, y):
                 # for slightly janky timing reasons, we want to draw _now_ so the
                 # cursor replace functions get the right data.
                 buf.dirty = True
-            buf.draw()
+            buf.draw(x_offset=buf.x_offset, y_offset=buf.y_offset)
             return
 
     if hovered:
@@ -44,10 +44,10 @@ def mouse_move(x, y):
 
 def mouse_down(x, y):
     for buf in buffers:
-        if buf._x <= x < buf._x + buf.width and buf._y <= y < buf._y + buf.width:
+        if (buf._x + buf.x_offset) <= x < (buf._x + buf.x_offset + buf.width) and (buf._y + buf.y_offset) <= y < (buf._y + buf.y_offset + buf.width):
             buf.mouse_down(x, y)
             return
-            
+
     log.debug("mouse_down: no target")
 
 
@@ -66,12 +66,12 @@ class ClickableBox(pytality.buffer.Box):
         self._hover_data = pytality.buffer.Box(**kwargs)._data
 
     def mouse_in(self, x, y):
-        print 'in', self, x, y
+        #print 'in', self, x, y
         self._data = self._hover_data
         self.dirty = True
 
     def mouse_out(self, x, y):
-        print 'out', self, x, y
+        #print 'out', self, x, y
         self._data = self._regular_data
         self.dirty = True
 
@@ -96,7 +96,7 @@ class Test(unittest.TestCase):
             p2.mouse_out(x, y)
             unregister(p2)
         p2.mouse_down = mouse_down
-        
+
         @event.on('test.draw')
         def on_draw():
             p.draw()
