@@ -19,12 +19,30 @@ effect_text = dict(
 class Monster(object):
     defeated = False
     stage = -1
-    hp = 4
+    started = False
 
-    def battle_tick(self, hero_sprite, monster_sprite):
+    def battle_tick(self, hero, hero_sprite, monster_sprite, dungeon):
+        message_log = dungeon.message_log
+
+        if not self.started:
+            message_log.add("")
+            message_log.add("<WHITE>%s</> appears!" % self.name)
+            self.started = True
+            if "durable" in self.tags:
+                self.hp = self.max_hp = 60
+            else:
+                self.hp = self.max_hp = 40
+            hero.start_combat(self, dungeon)
+
         #print self.hp, self.stage
         if self.stage == 0:
+            hero.hp -= 5
+            if hero.hp <= 0:
+                hero.hp = 0
+                hero.defeated = True
+
             hero_sprite.set_at(0, 0, fg=pytality.colors.DARKGREY)
+            message_log.add("The monster attacks!")
 
         elif self.stage < 3:
             hero_sprite.set_at(0, 0, fg=pytality.colors.WHITE)
@@ -34,22 +52,26 @@ class Monster(object):
 
         elif self.stage == 6:
             monster_sprite.set_at(0, 0, fg=pytality.colors.RED)
+            message_log.add("The hero strikes!")
+            self.hp -= 15
+            if self.hp <= 0:
+                self.hp = 0
+                message_log.add("<WHITE>%s</> is defeated!" % self.name)
+                hero.end_combat(self, dungeon)
+                self.defeated = True
 
         elif self.stage < 9:
             monster_sprite.set_at(0, 0, fg=pytality.colors.LIGHTRED)
 
         else:
-            self.hp -= 1
             self.stage = -1
-            if not self.hp:
-                self.defeated = True
         self.stage += 1
 
 class MonsterCard(clickable.ClickableBox, Monster):
     def __init__(self, parent=None, **kwargs):
         self.portrait = data.load_buffer(self.art_file, width=14, crop=True)
 
-        self.name = pytality.buffer.PlainText(self.name, y=11, center_to=14, fg=pytality.colors.WHITE)
+        self.name_text = pytality.buffer.PlainText(self.name, y=11, center_to=14, fg=pytality.colors.WHITE)
         self.line1 = pytality.buffer.PlainText(y=12, center_to=14, **effect_text[self.tags[0]])
         self.line2 = pytality.buffer.PlainText(y=13, center_to=14, **effect_text[self.tags[1]])
 
@@ -60,7 +82,7 @@ class MonsterCard(clickable.ClickableBox, Monster):
             width=16, height=16,
             boxtype=pytality.boxtypes.BoxSingle,
             border_fg=pytality.colors.DARKGREY,
-            children=[self.portrait, self.name, self.line1, self.line2, self.overlay],
+            children=[self.portrait, self.name_text, self.line1, self.line2, self.overlay],
             **kwargs
         )
         self.overlay.start("fade_in")

@@ -100,7 +100,7 @@ class Dungeon(object):
             dungeon=self,
         )
         self.level = generate_level(
-            10,
+            1,
             x=sidebar_width,
             width=main.screen_width - sidebar_width * 2,
             height=main.screen_height - self.card_display.height
@@ -112,6 +112,7 @@ class Dungeon(object):
             self.level
         ])
         self.i = 0
+        self.message_log.add("The hero sets out.")
 
     def tick(self):
         self.i += 1
@@ -120,7 +121,10 @@ class Dungeon(object):
             self.root.dirty = True
 
         self.card_display.tick()
-        self.level.tick()
+        self.level.tick(self)
+        hero.active_hero.dungeon_tick(self)
+        self.stat_display.tick(self)
+
 
     def draw(self):
         self.root.draw()

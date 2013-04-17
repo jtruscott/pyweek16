@@ -8,6 +8,7 @@ import traceback
 import sys
 import clickable
 import dungeon
+import boss
 import logging
 
 log = logging.getLogger(__name__)
@@ -78,7 +79,7 @@ def tick_loop():
                 #we've been asked to shut dow
                 log.debug("Tick thread shutting down")
                 return
-    
+
     except KeyboardInterrupt as e:
         action_queue.put(Stop)
 
@@ -121,7 +122,7 @@ def input_loop():
         if shutdown_event.is_set():
             logging.warn("Got an error but was already supposed to shutdown, whatever")
             return
-            
+
         logging.exception(e)
         try:
             traceback.print_exc(e, file=sys.stderr)

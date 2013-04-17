@@ -1,4 +1,6 @@
 import pytality
+import hero
+import event
 import heapq
 
 room_size = 40
@@ -181,13 +183,18 @@ class Level(pytality.buffer.Buffer):
         self.active_monster = None
         self.children = [self.view_buffer, self.hero_sprite, self.monster_sprite]
 
-    def tick(self):
+    def tick(self, dungeon):
         if not self.active_monster:
             if self.move_path:
                 self.hero_location = self.move_path.pop(0)
                 self.center_map_on_hero()
+            else:
+                dungeon.message_log.add("The hero has reached\nthe end of the dungeon!")
+                import game
+                game.mode = "boss"
+                event.fire("boss.setup", dungeon)
         else:
-            self.active_monster.battle_tick(self.hero_sprite, self.monster_sprite)
+            self.active_monster.battle_tick(hero.active_hero, self.hero_sprite, self.monster_sprite, dungeon)
             if self.active_monster.defeated:
                 self.active_monster = None
                 self.monster_sprite.is_invisible = True
