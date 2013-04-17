@@ -5,6 +5,7 @@ import main
 import overlay
 import data
 import random
+import clickable
 import time
 
 class BattleSprite(pytality.buffer.Buffer):
@@ -25,6 +26,7 @@ class Battle(object):
         self.message_log = dungeon.message_log
         self.stat_display = dungeon.stat_display
         self.stat_display.set_mode("battle")
+        clickable.unregister_all()
 
 
         self.battle_window = pytality.buffer.Buffer(
@@ -91,7 +93,7 @@ class Battle(object):
                 time.sleep(min(0.03, max(0, time.time() - start + 0.03)))
             self.flashed = True
             # we wiped these out just now
-            self.battle_window.draw()
+            self.battle_window.draw(dirty=True)
 
 
 active_battle = None

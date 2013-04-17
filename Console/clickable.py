@@ -19,6 +19,11 @@ def unregister(buf):
     if buf == hovered:
         hovered = None
 
+def unregister_all():
+    global buffers
+    global hovered
+    buffers = set()
+    hovered = None
 
 def mouse_move(x, y):
     global hovered

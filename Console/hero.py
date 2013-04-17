@@ -1,5 +1,53 @@
 import pytality
 import event
+import data
+
+class MoraleMeter(pytality.buffer.Buffer):
+    def __init__(self, **kwargs):
+        super(MoraleMeter, self).__init__(width=19, height=16, **kwargs)
+        self.base = data.load_buffer('meter.ans', width=6, crop=True)
+        self.meter = data.load_buffer('meter.ans', width=6, crop=True)
+        self.text_lines = [
+            pytality.buffer.RichText("<%s>- DESPONDENT", x=5, y=13),
+            pytality.buffer.RichText("<%s>- APATHETIC", x=5, y=10),
+            pytality.buffer.RichText("<%s>- DRIVEN", x=5, y=7),
+            pytality.buffer.RichText("<%s>- HEROIC", x=5, y=4),
+            pytality.buffer.RichText("<%s>- HOT BLOODED", x=5, y=1),
+        ]
+        self.children = [self.meter] + self.text_lines
+        self.last_value = None
+
+    def tick(self):
+        if (active_hero.morale, active_hero.max_morale) == self.last_value:
+            return
+
+        self.last_value = (active_hero.morale, active_hero.max_morale)
+
+        filled_rows = int(15.0 * active_hero.morale / active_hero.max_morale)
+        for i, line in enumerate(self.text_lines):
+            row_target = i*3 + 1
+            if filled_rows >= row_target and filled_rows < row_target + 3:
+                line.format(("WHITE",))
+            else:
+                line.format(("DARKGREY",))
+
+        for row in range(15):
+            y = 14 - row
+            for x in (1, 2, 3):
+                fg, bg, ch = self.base._data[y][x]
+                if row > filled_rows:
+                    self.meter._data[y][x] = [fg, bg, ch]
+                else:
+                    if row == 0 or row == 14:
+                        if x == 1 or x == 3:
+                            self.meter._data[y][x] = [fg, bg, ch]
+                        elif row == 14:
+                            self.meter._data[y][x] = [fg, pytality.colors.LIGHTRED, ch]
+                        else:
+                            self.meter._data[y][x] = [fg, pytality.colors.BLUE, ch]
+                    else:
+                        self.meter._data[y][x] = [fg, bg, '\xDB']
+        self.meter.dirty = True
 
 class StatDisplay(pytality.buffer.Box):
     def __init__(self, **kwargs):
@@ -16,6 +64,8 @@ class StatDisplay(pytality.buffer.Box):
 
         self.battle_header = pytality.buffer.PlainText("BOSS BATTLE", y=10, fg=pytality.colors.LIGHTRED, center_to=self.inner_width, is_invisible=True)
 
+        self.morale_meter = MoraleMeter(x=2, y=20)
+
         self.children.extend([
             self.title,
             self.hero_name,
@@ -24,7 +74,8 @@ class StatDisplay(pytality.buffer.Box):
             self.hero_hp_bar,
             self.monster_name,
             self.monster_hp_text,
-            self.battle_header
+            self.battle_header,
+            self.morale_meter
         ])
 
         self.mode = "dungeon"
@@ -71,6 +122,12 @@ class StatDisplay(pytality.buffer.Box):
         else:
             battle = owner
 
+        self.morale_meter.tick()
+
+        import random
+        active_hero.morale = random.randint(0, active_hero.max_morale)
+
+
 
 class Hero(object):
     defeated = False
@@ -82,7 +139,8 @@ class Hero(object):
     def __init__(self):
         self.hp = 75
         self.max_hp = 100
-        self.morale = 100
+        self.morale = 80
+        self.max_morale = 100
         self.level = 1
         self.next_regen = 0
 

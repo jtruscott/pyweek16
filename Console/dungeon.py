@@ -100,7 +100,7 @@ class Dungeon(object):
             dungeon=self,
         )
         self.level = generate_level(
-            1,
+            10,
             x=sidebar_width,
             width=main.screen_width - sidebar_width * 2,
             height=main.screen_height - self.card_display.height
