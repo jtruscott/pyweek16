@@ -7,6 +7,7 @@ class MoraleMeter(pytality.buffer.Buffer):
         super(MoraleMeter, self).__init__(width=19, height=16, **kwargs)
         self.base = data.load_buffer('meter.ans', width=6, crop=True)
         self.meter = data.load_buffer('meter.ans', width=6, crop=True)
+        self.title = pytality.buffer.PlainText("HERO MORALE", y=-2, fg=pytality.colors.WHITE, center_to=self.width)
         self.text_lines = [
             pytality.buffer.RichText("<%s>- DESPONDENT", x=5, y=13),
             pytality.buffer.RichText("<%s>- APATHETIC", x=5, y=10),
@@ -14,7 +15,7 @@ class MoraleMeter(pytality.buffer.Buffer):
             pytality.buffer.RichText("<%s>- HEROIC", x=5, y=4),
             pytality.buffer.RichText("<%s>- HOT BLOODED", x=5, y=1),
         ]
-        self.children = [self.meter] + self.text_lines
+        self.children = [self.title, self.meter] + self.text_lines
         self.last_value = None
 
     def tick(self):
@@ -64,7 +65,7 @@ class StatDisplay(pytality.buffer.Box):
 
         self.battle_header = pytality.buffer.PlainText("BOSS BATTLE", y=10, fg=pytality.colors.LIGHTRED, center_to=self.inner_width, is_invisible=True)
 
-        self.morale_meter = MoraleMeter(x=2, y=20)
+        self.morale_meter = MoraleMeter(x=2, y=30)
 
         self.children.extend([
             self.title,
@@ -124,10 +125,6 @@ class StatDisplay(pytality.buffer.Box):
 
         self.morale_meter.tick()
 
-        import random
-        active_hero.morale = random.randint(0, active_hero.max_morale)
-
-
 
 class Hero(object):
     defeated = False
@@ -139,7 +136,7 @@ class Hero(object):
     def __init__(self):
         self.hp = 75
         self.max_hp = 100
-        self.morale = 80
+        self.morale = 100
         self.max_morale = 100
         self.level = 1
         self.next_regen = 0

@@ -9,13 +9,27 @@ import clickable
 import time
 
 class BattleSprite(pytality.buffer.Buffer):
-    def __init__(self, file_name=None, **kwargs):
-        super(BattleSprite, self).__init__(width=16, height=16, **kwargs)
-        self.sprite = data.load_buffer(file_name, width=14, crop=True)
-        self.sprite.x = 1
-        self.sprite.y = 1
-        self.overlay = overlay.Overlay(width=16, height=16, x=0, y=0)
+    def __init__(self, width=16, height=16, crop=True, file_name=None, **kwargs):
+        super(BattleSprite, self).__init__(width=width, height=width, **kwargs)
+        self.sprite = data.load_buffer(file_name, width=width, crop=crop)
+        self.overlay = overlay.Overlay(width=width, height=width, x=0, y=0)
         self.children = [self.sprite, self.overlay]
+
+    def tick(self):
+        self.overlay.tick(self)
+
+
+class ActionWindow(pytality.buffer.Box):
+    def __init__(self, battle=None, **kwargs):
+        super(ActionWindow, self).__init__(
+            draw_bottom=False, draw_left=False, draw_right=False, padding_x=0,
+            **kwargs
+        )
+        self.battle = battle
+
+        self.title = pytality.buffer.PlainText("[ Battle Actions ]", y=-1, fg=pytality.colors.WHITE)
+        self.title.x = (self.inner_width / 2) - (self.title.width / 2)
+        self.children.append(self.title)
 
 
 class Battle(object):
@@ -36,8 +50,20 @@ class Battle(object):
             width=main.screen_width - (sidebar_width * 2)
 
         )
-        self.boss_sprite = BattleSprite(file_name="idk.ans", x=10, y=10)
-        self.hero_sprite = BattleSprite(file_name="pinata.ans", x=self.battle_window.width - 30, y=10)
+        self.action_window = ActionWindow(
+            width=main.screen_width - sidebar_width * 2,
+            height=bottom_height,
+            x=sidebar_width,
+            y=main.screen_height - bottom_height,
+            border_fg=pytality.colors.LIGHTGREY,
+            battle=self,
+        )
+        real_boss = False
+        if real_boss:
+            self.boss_sprite = BattleSprite(file_name="finalboss.ans", width=61, height=48, x=self.battle_window.width - 61, y=0, crop=True)
+        else:
+            self.boss_sprite = BattleSprite(file_name="you2.ans", width=34, height=31, x=self.battle_window.width - 40, y=15, crop=True)
+        self.hero_sprite = BattleSprite(file_name="herods.ans", width=18, height=15, x=10, y=30)
 
         self.battle_window.children = [self.boss_sprite, self.hero_sprite]
 
@@ -50,7 +76,8 @@ class Battle(object):
         self.root = pytality.buffer.Buffer(height=0, width=0, children=[
             self.message_log,
             self.stat_display,
-            self.battle_window
+            self.battle_window,
+            self.action_window
         ])
         self.i = 0
         self.flashed = False
@@ -63,10 +90,24 @@ class Battle(object):
             self.root.dirty = True
 
         self.stat_display.tick(self)
-        self.boss_sprite.x = max(min(self.boss_sprite.x + random.randint(-1, 1), self.battle_window.width - 16), 0)
-        self.boss_sprite.y = max(min(self.boss_sprite.y + random.randint(-1, 1), self.battle_window.height - 16), 0)
-        self.hero_sprite.x = max(min(self.hero_sprite.x + random.randint(-1, 1), self.battle_window.width - 16), 0)
-        self.hero_sprite.y = max(min(self.hero_sprite.y + random.randint(-1, 1), self.battle_window.height - 16), 0)
+
+        # wheeee let's be stupid
+        #if self.i % 20 == 0:
+        #    self.hero_sprite.overlay.start("fade_in")
+        #if self.i % 20 == 10:
+        #    self.boss_sprite.overlay.start("fade_in")
+
+        # animation tickers
+        self.hero_sprite.tick()
+        self.boss_sprite.tick()
+
+        # wheeee let's be stupid
+        #if not self.boss_sprite.overlay.animation:
+        #    self.boss_sprite.x = max(min(self.boss_sprite.x + random.randint(-1, 1), self.battle_window.width - 16), 0)
+        #    self.boss_sprite.y = max(min(self.boss_sprite.y + random.randint(-1, 1), self.battle_window.height - 16), 0)
+        #if not self.hero_sprite.overlay.animation:
+        #    self.hero_sprite.x = max(min(self.hero_sprite.x + random.randint(-1, 1), self.battle_window.width - 16), 0)
+        #    self.hero_sprite.y = max(min(self.hero_sprite.y + random.randint(-1, 1), self.battle_window.height - 16), 0)
 
     def draw(self):
         self.root.draw()
@@ -92,8 +133,10 @@ class Battle(object):
                 # about 30fps.
                 time.sleep(min(0.03, max(0, time.time() - start + 0.03)))
             self.flashed = True
+
             # we wiped these out just now
             self.battle_window.draw(dirty=True)
+            self.action_window.draw(dirty=True)
 
 
 active_battle = None
