@@ -7,6 +7,7 @@ class MoraleMeter(pytality.buffer.Buffer):
         super(MoraleMeter, self).__init__(width=19, height=16, **kwargs)
         self.base = data.load_buffer('meter.ans', width=6, crop=True)
         self.meter = data.load_buffer('meter.ans', width=6, crop=True)
+        self.title = pytality.buffer.PlainText("HERO MORALE", y=-2, fg=pytality.colors.WHITE, center_to=self.width)
         self.text_lines = [
             pytality.buffer.RichText("<%s>- DESPONDENT", x=5, y=13),
             pytality.buffer.RichText("<%s>- APATHETIC", x=5, y=10),
@@ -14,7 +15,7 @@ class MoraleMeter(pytality.buffer.Buffer):
             pytality.buffer.RichText("<%s>- HEROIC", x=5, y=4),
             pytality.buffer.RichText("<%s>- HOT BLOODED", x=5, y=1),
         ]
-        self.children = [self.meter] + self.text_lines
+        self.children = [self.title, self.meter] + self.text_lines
         self.last_value = None
 
     def tick(self):
@@ -64,7 +65,7 @@ class StatDisplay(pytality.buffer.Box):
 
         self.battle_header = pytality.buffer.PlainText("BOSS BATTLE", y=10, fg=pytality.colors.LIGHTRED, center_to=self.inner_width, is_invisible=True)
 
-        self.morale_meter = MoraleMeter(x=2, y=20)
+        self.morale_meter = MoraleMeter(x=2, y=30)
 
         self.children.extend([
             self.title,
@@ -87,6 +88,14 @@ class StatDisplay(pytality.buffer.Box):
             self.monster_name.is_invisible = True
             self.monster_hp_text.is_invisible = True
             self.battle_header.is_invisible = False
+        elif mode == "dungeon":
+            self.monster_name.is_invisible = False
+            self.monster_hp_text.is_invisible = False
+            self.battle_header.is_invisible = True
+        else:
+            self.monster_name.is_invisible = True
+            self.monster_hp_text.is_invisible = True
+            self.battle_header.is_invisible = True
         self.dirty = True
 
     def tick(self, owner=None):
@@ -124,10 +133,8 @@ class StatDisplay(pytality.buffer.Box):
 
         self.morale_meter.tick()
 
-        import random
-        active_hero.morale = random.randint(0, active_hero.max_morale)
-
-
+active_hero = None
+stat_display = None
 
 class Hero(object):
     defeated = False
@@ -139,7 +146,7 @@ class Hero(object):
     def __init__(self):
         self.hp = 75
         self.max_hp = 100
-        self.morale = 80
+        self.morale = 100
         self.max_morale = 100
         self.level = 1
         self.next_regen = 0
@@ -168,10 +175,17 @@ class Hero(object):
                 self.next_regen = self.regen_delay
                 self.gain_hp(self.regen_amount)
 
-active_hero = None
-
-@event.on("dungeon.setup")
-def hero_setup():
+@event.on('setup')
+def on_setup():
+    import main
+    global stat_display
     global active_hero
+
     active_hero = Hero()
 
+    stat_display = StatDisplay(
+        width=main.sidebar_width,
+        x=main.screen_width - main.sidebar_width,
+        height=main.screen_height,
+        draw_right=False, border_fg=pytality.colors.LIGHTGREY,
+    )

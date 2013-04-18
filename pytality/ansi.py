@@ -104,25 +104,34 @@ color_map = {
 #Unfortunately, ANSI escapes fully expect you to keep global state
 #around for color switching and bold toggling
 last_color = 37
+last_bg_color = 30
 bold = 0
 bg_bold = 0
 
-def lookup_color(bold, idx=None):
+def lookup_color(bold, idx=None, from_bg=False):
     global last_color
-    log.debug('lookup_color: bold=%r, idx=%r, last_color=%r' % (bold, idx, last_color))
+    global last_bg_color
+    log.debug('lookup_color: bold=%r, idx=%r, last_color=%r, from_bg=%r' % (bold, idx, last_color, from_bg))
 
     if idx is None:
         #When changing bold state, the actual color is not provided
-        idx = last_color
+        if from_bg:
+            idx = last_bg_color
+        else:
+            idx = last_color
 
     elif idx >= 40:
         #ANSI background color IDs are the same as the foreground colors, but +10
         idx -= 10
+        from_bg = True
 
-    else:
+    if not from_bg:
         #However, ANSI only 'persists' foreground colors
         #(because you can toggle boldness without setting the color)
         last_color = idx
+    else:
+        # unless you use the "blink" option!
+        last_bg_color = idx
 
     #now, lookup the damn color
     color = color_map[(bold, idx)]
@@ -226,6 +235,7 @@ def parse_escape(f, is_key=False):
         return default
 
     #determine what the escape represents
+    log.debug("command=%r args=%r", command, args)
 
     if command == 'A': return Escape('up', value=optional_arg())
     elif command == 'B': return Escape('down', value=optional_arg())
@@ -243,10 +253,15 @@ def parse_escape(f, is_key=False):
         for arg in args:
             if arg == 1:
                 #1 means we want to enable bold foreground colors (only)
-                #unless we're using an extension that bolds background colors
                 bold = 1
                 log.debug("parse_escape: bolding")
                 fg = lookup_color(bold, None)
+
+            elif arg == 5:
+                #5 is supposed to mean "blink", but some editors use it to mean "bold background"
+                bg_bold = 1
+                log.debug("parse_escape: bolding bg")
+                bg = lookup_color(bg_bold, None, from_bg=True)
 
             elif arg == 0:
                 #0 means we want to reset everything
@@ -257,7 +272,7 @@ def parse_escape(f, is_key=False):
                 bg_bold = 0
                 log.debug("parse_escape: resetting colors")
                 fg = lookup_color(bold, 37)
-                bg = term.colors.BLACK
+                bg = lookup_color(bg_bold, 30, from_bg=True)
 
             elif 30 <= arg <= 37:
                 #30-37 means we want to change the foreground color
@@ -268,7 +283,7 @@ def parse_escape(f, is_key=False):
                 #40-47 are the same as 30-37, but for the background color
                 #oh, but backgrounds can't ever be bold. sorry.
                 log.debug("parse_escape: bg=%r" % arg)
-                bg = lookup_color(0, arg)
+                bg = lookup_color(bg_bold, arg)
 
         return Escape('color', fg=fg, bg=bg)
 
