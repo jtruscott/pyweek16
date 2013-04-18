@@ -235,6 +235,7 @@ def parse_escape(f, is_key=False):
         return default
 
     #determine what the escape represents
+    log.debug("command=%r args=%r", command, args)
 
     if command == 'A': return Escape('up', value=optional_arg())
     elif command == 'B': return Escape('down', value=optional_arg())
@@ -256,11 +257,11 @@ def parse_escape(f, is_key=False):
                 log.debug("parse_escape: bolding")
                 fg = lookup_color(bold, None)
 
-            if arg == 5:
+            elif arg == 5:
                 #5 is supposed to mean "blink", but some editors use it to mean "bold background"
                 bg_bold = 1
                 log.debug("parse_escape: bolding bg")
-                fg = lookup_color(bold, None, from_bg=True)
+                bg = lookup_color(bg_bold, None, from_bg=True)
 
             elif arg == 0:
                 #0 means we want to reset everything
@@ -271,7 +272,7 @@ def parse_escape(f, is_key=False):
                 bg_bold = 0
                 log.debug("parse_escape: resetting colors")
                 fg = lookup_color(bold, 37)
-                bg = term.colors.BLACK
+                bg = lookup_color(bg_bold, 30, from_bg=True)
 
             elif 30 <= arg <= 37:
                 #30-37 means we want to change the foreground color

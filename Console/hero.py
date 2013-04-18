@@ -88,6 +88,14 @@ class StatDisplay(pytality.buffer.Box):
             self.monster_name.is_invisible = True
             self.monster_hp_text.is_invisible = True
             self.battle_header.is_invisible = False
+        elif mode == "dungeon":
+            self.monster_name.is_invisible = False
+            self.monster_hp_text.is_invisible = False
+            self.battle_header.is_invisible = True
+        else:
+            self.monster_name.is_invisible = True
+            self.monster_hp_text.is_invisible = True
+            self.battle_header.is_invisible = True
         self.dirty = True
 
     def tick(self, owner=None):
@@ -125,6 +133,8 @@ class StatDisplay(pytality.buffer.Box):
 
         self.morale_meter.tick()
 
+active_hero = None
+stat_display = None
 
 class Hero(object):
     defeated = False
@@ -170,10 +180,17 @@ class Hero(object):
                 self.next_regen = self.regen_delay
                 self.gain_hp(self.regen_amount)
 
-active_hero = None
-
-@event.on("dungeon.setup")
-def hero_setup():
+@event.on('setup')
+def on_setup():
+    import main
+    global stat_display
     global active_hero
+
     active_hero = Hero()
 
+    stat_display = StatDisplay(
+        width=main.sidebar_width,
+        x=main.screen_width - main.sidebar_width,
+        height=main.screen_height,
+        draw_right=False, border_fg=pytality.colors.LIGHTGREY,
+    )

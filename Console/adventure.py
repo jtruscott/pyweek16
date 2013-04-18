@@ -29,7 +29,12 @@ class Option(object):
 class Choice(clickable.ClickableBox):
     def __init__(self, adventure=None, text="", height=5, set=None, value=None, next=None, **kwargs):
         self.adventure = adventure
-        self.inner_text = pytality.buffer.RichText(text, x=1, y=1)
+        self.inner_text = pytality.buffer.RichText(
+            text,
+            x=1, y=1,
+            initial_color=pytality.colors.BLACK,
+            bg=pytality.colors.LIGHTGREY
+        )
         self.set = set
         self.value = value
         self.next = next
@@ -38,9 +43,22 @@ class Choice(clickable.ClickableBox):
             width=self.inner_text.width + 4,
             children=[self.inner_text],
             boxtype=pytality.boxtypes.BoxSingle,
-            border_fg=pytality.colors.DARKGREY,
+            border_bg=pytality.colors.BROWN, border_fg=pytality.colors.YELLOW,
+            interior_bg=pytality.colors.LIGHTGREY, interior_fg=pytality.colors.BLACK,
+            hover_interior_bg=pytality.colors.WHITE, hover_interior_fg=pytality.colors.BLACK,
+            hover_border_bg=pytality.colors.BROWN, hover_border_fg=pytality.colors.WHITE,
             **kwargs
         )
+
+    def mouse_in(self, mx, my):
+        self.inner_text.bg = pytality.colors.WHITE
+        self.inner_text.update_data()
+        super(Choice, self).mouse_in(mx, my)
+
+    def mouse_out(self, mx, my):
+        self.inner_text.bg = pytality.colors.LIGHTGREY
+        self.inner_text.update_data()
+        super(Choice, self).mouse_out(mx, my)
 
     def mouse_down(self, mx, my):
         if not self.adventure.choice_clicked(self):
@@ -49,38 +67,35 @@ class Choice(clickable.ClickableBox):
 options = dict(
     burn_1=Option(
         text="""
-                                         <LIGHTRED>Burn Down The Village!</>
+                               <RED>Burn Down The Village!</>
 
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer a sem aliquam purus congue fringilla ut ut magna.
-Nulla accumsan porta ligula, eu lacinia arcu euismod et. Maecenas suscipit semper sem, sit amet facilisis erat blandit tincidunt.
-Praesent scelerisque urna a ligula elementum dignissim. Vestibulum consequat tellus et nisl imperdiet semper.
-Vestibulum mauris dui, commodo vitae consequat dapibus, varius non velit. Sed eget eros in lectus accumsan malesuada a quis turpis.
-Vivamus quis est velit. Nam at cursus nibh.
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer a sem aliquam
 
-Aenean tempus, eros eu dictum bibendum, dolor nulla laoreet <LIGHTGREEN>nibh</>, sollicitudin condimentum nunc purus vel turpis.
-Curabitur a velit justo. Morbi euismod, turpis varius mollis luctus, diam augue tincidunt massa, ac auctor nibh justo vitae urna.
-Fusce mollis pellentesque molestie. Donec non orci felis, ut ornare velit. Phasellus ut urna ac ligula gravida scelerisque.
-Nunc posuere facilisis neque, vehicula congue odio venenatis sed. Donec scelerisque bibendum libero, id accumsan dui imperdiet quis.
-Mauris quis lacus ante, et aliquet mauris. <WHITE>Aenean vel risus tortor</>. Nulla eleifend gravida turpis, sit amet malesuada massa
-facilisis et. In hac habitasse platea dictumst. Maecenas tempus, turpis vel egestas ullamcorper, urna mi venenatis quam,
-vel pharetra augue mi vitae odio. Quisque elementum blandit velit a iaculis. Donec lectus libero, viverra in vulputate id,
-rutrum accumsan sapien. Vestibulum egestas molestie tempor.
+Nulla accumsan porta ligula, eu lacinia arcu euismod et. Maecenas suscipit semper
+
+  blandit tincidunt. Praesent scelerisque urna a ligula elementum dignissim.
+
+  imperdiet semper. Vestibulum mauris dui, commodo vitae consequat dapibus,
+
+accumsan malesuada a quis turpis. Vivamus quis est velit. Nam at cursus nibh.
 """,
-        text_kwargs=dict(y=5, x=10),
-        choice_kwargs=dict(y=30, x=60),
+        text_kwargs=dict(y=25, x=25, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE),
+        choice_kwargs=dict(
+            y=50,
+        ),
         choices=[
-            dict(set="killed_father", value=True, next="burn_2", text="Kill His Father!"),
-            dict(set="killed_father", value=False, next="burn_2", text="Maim His Father!"),
+            dict(set="killed_father", value=True, next="burn_2", text="Kill His Father!", x=35),
+            dict(set="killed_father", value=False, next="burn_2", text="Maim His Father!", x=65),
         ]
     ),
     burn_2=Option(
         text="<YELLOW>Kill Everybody!",
-        text_kwargs=dict(y=5, x=30),
-        choice_kwargs=dict(y=10, x=40),
+        text_kwargs=dict(x=25, y=25),
+        choice_kwargs=dict(y=50),
         choices=[
-            dict(set="next_dungeon", value="crypt", next="end_act", text="Yes!"),
-            dict(set="next_dungeon", value="orcs", next="end_act", text="No!"),
+            dict(set="next_dungeon", value="crypt", next="end_act", text="Yes!", x=40),
+            dict(set="next_dungeon", value="orcs", next="end_act", text="No!", x=60),
         ]
     ),
 )
@@ -88,12 +103,18 @@ rutrum accumsan sapien. Vestibulum egestas molestie tempor.
 class Adventure(object):
     def __init__(self):
         clickable.unregister_all()
+        hero.stat_display.set_mode("adventure")
 
-        self.root = pytality.buffer.Buffer(height=main.screen_height, width=main.screen_width)
+        self.root = pytality.buffer.Buffer(height=main.screen_height, width=main.screen_width - main.sidebar_width)
+        self.frame_l = data.load_buffer("frame-l.ans", width=80, crop=False)
+        self.frame_r = data.load_buffer("frame-r.ans", width=49, crop=True)
+        self.frame_r.x = 80
         self.i = 0
 
     def load_option(self, key):
+        log.debug("loading option %r", key)
         option = options[key]
+        self.root.children = [hero.stat_display, self.frame_l, self.frame_r]
         self.choice_items = []
 
         self.root.children.append(pytality.buffer.RichText(option.text, **option.text_kwargs))
@@ -102,8 +123,8 @@ class Adventure(object):
             kwargs.update(option.choice_kwargs)
             choice = Choice(adventure=self, **kwargs)
 
-            if 'y' in option.choice_kwargs:
-                option.choice_kwargs['y'] += choice.height + 1
+            #if 'y' in option.choice_kwargs:
+            #    option.choice_kwargs['y'] += choice.height + 1
 
             self.choice_items.append(choice)
             clickable.register(choice)
@@ -112,7 +133,17 @@ class Adventure(object):
         self.root.dirty = True
 
     def choice_clicked(self, choice):
-        print choice, dir(choice)
+        clickable.unregister_all()
+
+        if choice.set:
+            setattr(World, choice.set, choice.value)
+
+        if choice.next == "end_act":
+            import game
+            event.fire("dungeon.setup")
+            game.mode = "dungeon"
+        else:
+            self.load_option(choice.next)
 
     def tick(self):
         self.i += 1
@@ -146,7 +177,7 @@ import unittest
 class Test(unittest.TestCase):
     def test_prompt(self):
         import game
-        event.fire("hero.setup")
+        event.fire("setup")
         event.fire("adventure.setup")
         active_adventure.load_option("burn_1")
 

@@ -85,12 +85,8 @@ class Dungeon(object):
             height=main.screen_height,
             draw_left=False, border_fg=pytality.colors.LIGHTGREY,
         )
-        self.stat_display = hero.StatDisplay(
-            width=sidebar_width,
-            x=main.screen_width - sidebar_width,
-            height=main.screen_height,
-            draw_right=False, border_fg=pytality.colors.LIGHTGREY,
-        )
+        self.stat_display = hero.stat_display
+
         self.card_display = monsters.CardDisplay(
             width=main.screen_width - sidebar_width * 2,
             height=bottom_height,

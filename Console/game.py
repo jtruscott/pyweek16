@@ -42,6 +42,7 @@ def start():
     input_thread.daemon = True
     input_thread.start()
 
+    event.fire("setup")
     event.fire("dungeon.setup")
     try:
         while True:

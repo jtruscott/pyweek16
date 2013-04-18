@@ -11,6 +11,7 @@ log.debug("Starting up")
 # At least one user on the IRC is at 1280x800, which with 12px tall rows limits us to 65 max.
 screen_width = 155
 screen_height = 65
+sidebar_width = 26
 
 def main():
     # For compatability reasons, i'm going to force pytality to be SDL only for this compo.
