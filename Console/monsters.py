@@ -16,35 +16,97 @@ effect_text = dict(
     durable=dict(message="RESISTANCE", fg=pytality.colors.BROWN)
 )
 
+def combat(attack, defense, powerful=False, durable=False):
+    attack_coeff = 10
+    defense_coeff = 1
+    powerful_coeff = 5
+    durable_coeff = 1
+
+    if powerful:
+        attack_coeff += powerful_coeff
+
+    if durable:
+        defense_coeff += durable_coeff
+
+    log.debug("starting values: attack %r defense %r attack coeff %r def coeff %r" % (attack, defense, attack_coeff, defense_coeff))
+
+    attack = attack * attack_coeff
+    defense = defense * defense_coeff
+
+    log.debug("final attack: %r; defense: %r" % (attack, defense))
+
+    return attack / defense
+
+
 class Monster(object):
+
     defeated = False
     stage = -1
     started = False
+
+    powerful = False
+    m_powerful = False
+    durable = False
+
+    hp = max_hp = 40
+    attack = 10
+    defense = 10
+
+    attack_type = 0 #0 for mixed magic/phys, 1 for phys only, 2 for magic only
+
+    if powerful and not m_powerful:
+        attack_type = 1
+    elif not powerful and m_powerful:
+        attack_type = 2
+
+    log.debug("creating monster with attack type %r" % attack_type)
 
     def battle_tick(self, hero, hero_sprite, monster_sprite, dungeon):
         message_log = dungeon.message_log
 
         if not self.started:
+            self.started = True
             message_log.add("")
             message_log.add("<WHITE>%s</> appears!" % self.name)
-            self.started = True
-            if "durable" in self.tags:
-                self.hp = self.max_hp = 60
+            hero.in_combat = True
+            attack_type = self.attack_type
+            if 'durable' in self.tags:
+                self.durable = True
+            if 'phys' in self.tags:
+                self.powerful = True
+            if 'magic' in self.tags:
+                self.m_powerful = True
+            if 'terror' in self.tags:
+                hero.lose_morale(10)
             else:
-                self.hp = self.max_hp = 40
-            hero.start_combat(self, dungeon)
+                hero.lose_morale(5)
 
         #print self.hp, self.stage
         if self.stage == 0:
-            hero.hp -= 5
-            if hero.hp <= 0:
-                hero.hp = 0
-                hero.defeated = True
-
             hero_sprite.set_at(0, 0, fg=pytality.colors.DARKGREY)
             message_log.add("The monster attacks!")
 
-        elif self.stage < 3:
+            if self.attack_type == 0:
+                attack_type = random.randint(1,2)
+
+            log.debug("this tick, attack type %r" %attack_type)
+
+            if attack_type == 1:
+                log.debug("Phys attack, attack %r, def %r, powerful %r" %(self.attack,hero.defense,self.powerful))
+                damage = combat(self.attack, hero.defense, self.powerful)
+            elif attack_type == 2:
+                log.debug("Mag attack, attack %r, def %r, powerful %r" %(self.attack,hero.m_defense,self.powerful))
+                damage = combat(self.attack, hero.m_defense, self.m_powerful)
+            else:
+                message_log.add("ERROR: illegal attack type")
+
+            hero.hp -= damage
+            if hero.hp <= 0:
+                hero.hp = hero.max_hp
+                message_log.add("<LIGHTRED>Hero was defeated!")
+                hero.defeated = True
+
+        elif self.stage == 1:
             hero_sprite.set_at(0, 0, fg=pytality.colors.WHITE)
 
         elif self.stage < 6:
@@ -53,15 +115,20 @@ class Monster(object):
         elif self.stage == 6:
             monster_sprite.set_at(0, 0, fg=pytality.colors.RED)
             message_log.add("The hero strikes!")
-            self.hp -= 15
+            damage = combat(hero.attack, self.defense, False, self.durable)
+            self.hp -= damage
             if self.hp <= 0:
                 self.hp = 0
+                monster_sprite.set_at(0, 0, fg=pytality.colors.LIGHTRED)
                 message_log.add("<WHITE>%s</> is defeated!" % self.name)
                 hero.end_combat(self, dungeon)
                 self.defeated = True
 
-        elif self.stage < 9:
+        elif self.stage == 7:
             monster_sprite.set_at(0, 0, fg=pytality.colors.LIGHTRED)
+
+        elif self.stage < 9:
+            pass
 
         else:
             self.stage = -1

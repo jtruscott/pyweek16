@@ -143,6 +143,9 @@ class Hero(object):
         self.max_morale = 100
         self.level = 1
         self.next_regen = 0
+        self.attack = 10
+        self.defense = 10
+        self.m_defense = 10
 
     def lose_morale(self, loss):
         self.morale -= loss
@@ -152,14 +155,6 @@ class Hero(object):
 
     def gain_hp(self, amount):
         self.hp = min(self.max_hp, self.hp + amount)
-
-    def start_combat(self, monster, dungeon):
-        if 'terror' in monster.tags:
-            self.lose_morale(10)
-        else:
-            self.lose_morale(5)
-
-        self.in_combat = True
 
     def end_combat(self, monster, dungeon):
         self.in_combat = False
