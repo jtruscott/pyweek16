@@ -54,12 +54,7 @@ class Monster(object):
 
     attack_type = 0 #0 for mixed magic/phys, 1 for phys only, 2 for magic only
 
-    if powerful and not m_powerful:
-        attack_type = 1
-    elif not powerful and m_powerful:
-        attack_type = 2
-
-    log.debug("creating monster with attack type %r" % attack_type)
+    #log.debug("creating monster with attack type %r" % attack_type)
 
     def battle_tick(self, hero, hero_sprite, monster_sprite, dungeon):
         message_log = dungeon.message_log
@@ -69,17 +64,25 @@ class Monster(object):
             message_log.add("")
             message_log.add("<WHITE>%s</> appears!" % self.name)
             hero.in_combat = True
-            attack_type = self.attack_type
+
             if 'durable' in self.tags:
                 self.durable = True
             if 'phys' in self.tags:
                 self.powerful = True
             if 'magic' in self.tags:
                 self.m_powerful = True
+            if self.powerful and not self.m_powerful:
+                self.attack_type = 1
+            elif not self.powerful and self.m_powerful:
+                self.attack_type = 2
+            self.attack_current = self.attack_type
+
             if 'terror' in self.tags:
                 hero.lose_morale(10)
             else:
                 hero.lose_morale(5)
+
+
 
         #print self.hp, self.stage
         if self.stage == 0:
@@ -87,14 +90,14 @@ class Monster(object):
             message_log.add("The monster attacks!")
 
             if self.attack_type == 0:
-                attack_type = random.randint(1,2)
+                self.attack_current = random.randint(1,2)
 
-            log.debug("this tick, attack type %r" %attack_type)
+            log.debug("this tick, attack type %r" %self.attack_current)
 
-            if attack_type == 1:
+            if self.attack_current == 1:
                 log.debug("Phys attack, attack %r, def %r, powerful %r" %(self.attack,hero.defense,self.powerful))
                 damage = combat(self.attack, hero.defense, self.powerful)
-            elif attack_type == 2:
+            elif self.attack_current == 2:
                 log.debug("Mag attack, attack %r, def %r, powerful %r" %(self.attack,hero.m_defense,self.powerful))
                 damage = combat(self.attack, hero.m_defense, self.m_powerful)
             else:
