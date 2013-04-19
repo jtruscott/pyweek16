@@ -1,6 +1,7 @@
 import pytality
 import main
 import event
+import data
 import unittest
 
 class PretentiousPullQuote(object):
@@ -38,13 +39,14 @@ class PretentiousPullQuote(object):
 
         self.end = at_i + 7
 
-        self.root = pytality.buffer.Buffer(height=main.screen_height, width=main.screen_width, children=lines + [self.title_l, self.title_r])
+        self.title = data.load_buffer("wip1.ans", width=80, crop=False)
+        self.title.x = (main.screen_width / 2) - (80 / 2)
+
+        self.root = pytality.buffer.Buffer(height=main.screen_height, width=main.screen_width, children=lines)
 
     def tick(self):
         if self.i > self.end:
-            import game
-            event.fire("dungeon.setup")
-            game.mode = "dungeon"
+            self.root.children = [self.title]
 
         self.i += 1
         while self.stages and self.i >= self.stages[0][0]:
@@ -57,6 +59,11 @@ class PretentiousPullQuote(object):
             self.i = self.visible_i
         elif self.i < self.end:
             self.i = self.end
+        else:
+            import game
+            event.fire("dungeon.setup")
+            game.mode = "dungeon"
+
         self.tick()
 
     def draw(self):
@@ -80,7 +87,6 @@ def dunsany_mouse_down(x, y):
 
 @event.on("dunsany.key")
 def dunsany_key(key):
-    print repr(key)
     if key == "enter" or key == " " or key == "\x1B":
         active_quote.force_finish()
 
