@@ -17,7 +17,7 @@ def main():
     # For compatability reasons, i'm going to force pytality to be SDL only for this compo.
     pytality.term.init(backends=['pygame'], width=screen_width, height=screen_height)
 
-    pytality.term.set_title('No Title Yet (PyWeek #16)')
+    pytality.term.set_title('...As Was Foretold (PyWeek #16)')
     pytality.term.set_cursor_type(2)
     pytality.term.clear()
 

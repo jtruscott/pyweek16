@@ -21,14 +21,16 @@ class PretentiousPullQuote(object):
 
         color_set = (pytality.colors.DARKGREY, pytality.colors.LIGHTGREY, pytality.colors.WHITE)
         self.stages = []
-        at_i = 0
+        at_i = 5
         for line in lines:
             for color in color_set:
                 self.stages.append((at_i, line, color))
                 at_i += 3
-            at_i += 20
+            at_i += 40
 
-        at_i += 15 * 5
+        at_i += 15 * 7
+        self.visible_i = at_i
+
         for color in (pytality.colors.LIGHTGREY, pytality.colors.DARKGREY, pytality.colors.BLACK):
             for line in lines:
                 self.stages.append((at_i, line, color))
@@ -36,7 +38,7 @@ class PretentiousPullQuote(object):
 
         self.end = at_i + 7
 
-        self.root = pytality.buffer.Buffer(height=main.screen_height, width=main.screen_width, children=lines)
+        self.root = pytality.buffer.Buffer(height=main.screen_height, width=main.screen_width, children=lines + [self.title_l, self.title_r])
 
     def tick(self):
         if self.i > self.end:
@@ -51,11 +53,11 @@ class PretentiousPullQuote(object):
             line.update_data()
 
     def force_finish(self):
-        for i, line, color in self.stages:
-            line.fg = color
-            line.update_data()
-        self.stages = []
-        self.i = self.end - 15
+        if self.i < self.visible_i:
+            self.i = self.visible_i
+        elif self.i < self.end:
+            self.i = self.end
+        self.tick()
 
     def draw(self):
         self.root.draw()
@@ -75,6 +77,13 @@ def dunsany_tick():
 @event.on("dunsany.mouse_down")
 def dunsany_mouse_down(x, y):
     active_quote.force_finish()
+
+@event.on("dunsany.key")
+def dunsany_key(key):
+    print repr(key)
+    if key == "enter" or key == " " or key == "\x1B":
+        active_quote.force_finish()
+
 
 @event.on("dunsany.draw")
 def dunsany_draw():

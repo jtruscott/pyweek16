@@ -10,6 +10,8 @@ import clickable
 import dungeon
 import boss
 import logging
+import adventure
+import dunsany
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ action_queue = queue.Queue()
 tick_thread = None
 shutdown_event = threading.Event()
 
-mode = "dungeon"
+mode = "dunsany"
 
 def start():
     log.debug("Starting Game")
@@ -43,7 +45,7 @@ def start():
     input_thread.start()
 
     event.fire("setup")
-    event.fire("dungeon.setup")
+    event.fire("dunsany.setup")
     try:
         while True:
             kwargs = action_queue.get()
