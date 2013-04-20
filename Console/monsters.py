@@ -144,7 +144,8 @@ class Monster(object):
             if self.hp <= 0:
                 self.hp = 0
                 monster_sprite.set_at(0, 0, fg=pytality.colors.LIGHTRED)
-                message_log.add("<WHITE>%s</> is defeated!" % self.name)
+                message_log.add("")
+                message_log.add("<WHITE>%s</> defeated!" % self.name)
                 log.debug("COMBAT: Monster Defeated")
                 log.debug("")
                 hero.end_combat(self, dungeon)

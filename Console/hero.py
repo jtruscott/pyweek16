@@ -384,7 +384,9 @@ class Hero(object):
         self.in_combat = False
         self.next_regen = self.regen_delay
         self.xp += monster.xp_value
+        dungeon.message_log.add("Gained %i XP!" % monster.xp_value)
         if self.xp >= self.max_xp:
+            dungeon.message_log.add("")
             dungeon.message_log.add("<YELLOW>Hero leveled up!")
             self.level += 1
             self.xp -= self.max_xp
