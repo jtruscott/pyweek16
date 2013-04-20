@@ -10,12 +10,13 @@ import hero
 import message
 import monsters
 import event
+import sound
 
 log = logging.getLogger(__name__)
 
 room_map = collections.defaultdict(list)
 for file_name in os.listdir(data.data_dir):
-    if 'room-' in file_name:
+    if 'room-' in file_name and '.ans' in file_name:
         prefix, directions, suffix = file_name.split('-', 2)
         room_buf = data.load_buffer(file_name, width=155, crop=True)
         room = Room(buf=room_buf, directions=directions, file_name=file_name)
@@ -132,6 +133,7 @@ active_dungeon = None
 def dungeon_setup(monster_type=None):
     global active_dungeon
     active_dungeon = Dungeon(monster_type=monster_type)
+    sound.play_music("Curse_of_The_Patashu.mp3")
 
 @event.on("dungeon.tick")
 def dungeon_tick():

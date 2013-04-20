@@ -3,6 +3,7 @@ import main
 import event
 import data
 import time
+import sound
 import unittest
 
 class PretentiousPullQuote(object):
@@ -39,6 +40,7 @@ class PretentiousPullQuote(object):
             at_i += 7
 
         self.end = at_i + 7
+        self.reached_end = False
         self.fire_end = None
 
         self.title_tl_bg = data.load_buffer("itsfullofstars.ans", width=22, crop=True)
@@ -80,6 +82,10 @@ class PretentiousPullQuote(object):
                 game.mode = "adventure"
 
         if self.i > self.end:
+            if not self.reached_end:
+                sound.play_music("Relax.mp3")
+                self.reached_end = True
+
             self.root.children = [
                 self.title_tl_bg, self.title_tr_bg,
                 self.title_tl, self.title_tr,

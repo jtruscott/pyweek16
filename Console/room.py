@@ -2,6 +2,9 @@ import pytality
 import hero
 import event
 import heapq
+import logging
+
+log = logging.getLogger(__name__)
 
 room_size = 40
 
@@ -130,6 +133,8 @@ class Room(object):
             end_x, end_y = endpoint_map[destination]
 
         route = a_star(tiles[start_y][start_x], tiles[end_y][end_x], tiles)
+        if not route:
+            log.warn("no route found? source=%r, destination=%r, file_name=%r", source, destination, self.file_name)
         self.routes[source] = route
         return route
 
@@ -174,6 +179,8 @@ class Level(pytality.buffer.Buffer):
                 x = tile.x + start_x
                 y = tile.y + start_y
                 self.move_path.append((x, y))
+
+        log.debug("move_path: %r", self.move_path)
 
         self.view_buffer = pytality.buffer.BufferView(parent=self.main_buf, width=self.width, height=self.height)
         self.hero_sprite = pytality.buffer.PlainText("\x01", fg=pytality.colors.WHITE)
