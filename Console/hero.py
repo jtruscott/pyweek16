@@ -213,7 +213,7 @@ class Hero(object):
         self.hp = self.max_hp = 100
         self.next_regen = 0
 
-        self.morale = 30
+        self.morale = 66
         self.max_morale = 100
 
         self.xp = 0
@@ -277,13 +277,13 @@ class Hero(object):
 
         # i checked and these are the exact brackets.
         # it's a little weird because of the line rounding.
-        if self.morale >= 86:
+        if self.morale > 86:
             return 1.2
-        if self.morale >= 66:
+        if self.morale > 66:
             return 1.1
-        if self.morale >= 46:
+        if self.morale > 46:
             return 1.0
-        if self.morale >= 26:
+        if self.morale > 26:
             return 0.95
         return 0.9
 
