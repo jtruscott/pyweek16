@@ -233,7 +233,7 @@ class Hero(object):
     defeated = False
     in_combat = False
 
-    regen_delay = 5
+    regen_delay = 2
     regen_amount = 1
 
     def __init__(self):
