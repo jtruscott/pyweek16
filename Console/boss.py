@@ -272,9 +272,10 @@ class Battle(object):
                         if hero.active_hero.morale > 100:
                             hero.active_hero.morale = 100
 
-                choice = random.choice(exchanges)
-                self.show_dialog("hero", choice['hero'], "hero_attack", 0)
-                self.next_choice = choice
+                if hero.active_hero.hp > 0:
+                    choice = random.choice(exchanges)
+                    self.show_dialog("hero", choice['hero'], "hero_attack", 0)
+                    self.next_choice = choice
 
             elif self.next_state == "hero_attack":
                 self.hero_sprite.animate("flash")
@@ -364,7 +365,7 @@ class Battle(object):
         text_buffer.state_delay = state_delay
         clickable.register(text_buffer)
 
-        self.action_window.children = [portrait, title_buffer, text_buffer]
+        self.action_window.children = [self.action_window.title, portrait, title_buffer, text_buffer]
         self.action_window.dirty = True
 
     def dismiss_dialog(self, dialog, x, y):
