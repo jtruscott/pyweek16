@@ -147,9 +147,9 @@ options = dict(
         text_kwargs=dict(x=10, y=12, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE),
         choice_kwargs=dict(y=51, height=7),
         choices=[
-            dict(set="next_dungeon", value="fire", next="end_act1", text="Kidnap his girlfriend\n   and take her to   \n  the Fire Dungeon!  ", x=25, morale_bonus=70),
-            dict(set="next_dungeon", value="ogre", next="end_act1", text="  Steal that shield  \n   and store it in   \n  the Ogre Citadel!  ", x=55, morale_bonus=50),
-            dict(set="next_dungeon", value="crypt", next="end_act1", text="  Kill everyone and  \n raise the dead from \n  the Unholy Crypt!  ", x=85, morale_bonus=60),
+            dict(set="next_dungeon", value="fire", next="end_act1", text="Kidnap his girlfriend\n   and take her to   \n  the Fire Dungeon!  ", x=25, morale_bonus=60),
+            dict(set="next_dungeon", value="ogre", next="end_act1", text="  Steal that shield  \n   and store it in   \n  the Ogre Citadel!  ", x=55, morale_bonus=40),
+            dict(set="next_dungeon", value="crypt", next="end_act1", text="  Kill everyone and  \n raise the dead from \n  the Unholy Crypt!  ", x=85, morale_bonus=50),
         ]
     ),
     fetch_1=Option(
@@ -193,8 +193,8 @@ options = dict(
         text_kwargs=dict(x=10, y=12, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE),
         choice_kwargs=dict(y=51, height=6),
         choices=[
-            dict(set="next_dungeon", value="fire", next="end_act2", text=" Get the Sword Of The Ages \nfrom the Eldritch Dragons", x=30, morale_bonus=80),
-            dict(set="next_dungeon", value="crypt", next="end_act2", text=" Get the Armor Of The Ages \n  from the Haunted Tomb  ", x=70, morale_bonus=80),
+            dict(set="next_dungeon", value="fire", next="end_act2", text=" Get the Sword Of The Ages \nfrom the Eldritch Dragons", x=30, morale_bonus=30),
+            dict(set="next_dungeon", value="crypt", next="end_act2", text=" Get the Armor Of The Ages \n  from the Haunted Tomb  ", x=70, morale_bonus=30),
         ]
     ),
     final_1=Option(
@@ -234,7 +234,7 @@ options = dict(
         ]),
         choice_kwargs=dict(y=53, height=5),
         choices=[
-            dict(set="next_dungeon", value=None, next="end_act3", text="   OK   ", x=63, y=53, morale_bonus=50),
+            dict(set="next_dungeon", value=None, next="end_act3", text="   OK   ", x=63, y=53, morale_bonus=30),
         ]
     ),
 )

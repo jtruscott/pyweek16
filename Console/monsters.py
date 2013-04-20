@@ -64,7 +64,7 @@ class Monster(object):
 
         if not self.started:
             self.started = True
-            #log.debug("hero morale %r, modifier %r" % (hero.morale,hero.morale_multiplier()))
+            log.debug("Start: hero morale %r, mod %r" % (hero.morale, hero.morale_multiplier()))
             message_log.add("")
             message_log.add("<WHITE>%s</> appears!" % self.name)
             log.debug("")

@@ -186,8 +186,8 @@ class Battle(object):
             sound.play_music("OHC_Changeling_Rumble.mp3")
 
         act = (adventure.World.act - 1)
-        self.boss_attack = 15 + (10 * act)
-        self.boss_defense = 15 + (10 * act)
+        self.boss_attack = 13 + (10 * act)
+        self.boss_defense = 10 + (10 * act)
         self.boss_hp = self.boss_max_hp = 60 + (20 * act)
 
         self.hero_sprite = BattleSprite(file_names=[hero.active_hero.get_boss_file()], width=18, height=15, x=10, y=30)
@@ -264,14 +264,10 @@ class Battle(object):
                         self.next_state = "hero_defeated"
                         self.state_delay = len(self.hero_sprite.overlay.empty_cells) / 3 + 5
 
-                    elif self.real_boss:
-                        message_log.add("Hero is terrified!")
-                        hero.lose_morale(3)
-
-                    else:
-                        hero.active_hero.morale += 3
+                    elif not self.real_boss:
+                        hero.active_hero.morale += 5
                         if self.pending_attack_powerful:
-                            hero.active_hero.morale += 3
+                            hero.active_hero.morale += 5
 
                         if hero.active_hero.morale > 100:
                             hero.active_hero.morale = 100
