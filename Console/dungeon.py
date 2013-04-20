@@ -122,7 +122,10 @@ class Dungeon(object):
         self.card_display.tick()
         self.level.tick(self)
         hero.active_hero.dungeon_tick(self)
-        self.stat_display.tick(self)
+
+        # this could change out from under us
+        if self.stat_display.mode == "dungeon":
+            self.stat_display.tick(self)
 
 
     def draw(self):

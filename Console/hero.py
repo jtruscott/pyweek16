@@ -195,7 +195,7 @@ class StatDisplay(pytality.buffer.Box):
         else:
             battle = owner
             if battle:
-                start_y = max(25, self.hero_equipment_text.height + self.hero_equipment_text.y + 5)
+                start_y = max(25, self.hero_equipment_text.height + self.hero_equipment_text.y + 3)
                 # Boss HP
                 if battle.real_boss:
                     self.monster_name.set("World-Devourer")
