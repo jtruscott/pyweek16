@@ -66,7 +66,7 @@ class Monster(object):
             self.started = True
             log.debug("Start: hero morale %r, mod %r" % (hero.morale, hero.morale_multiplier()))
             message_log.add("")
-            message_log.add("<WHITE>%s</> appears!" % self.name)
+            message_log.add("<LIGHTCYAN>%s</> appears!" % self.name)
             log.debug("")
             log.debug("COMBAT: %s with %r HP" % (self.name, self.max_hp))
             log.debug("COMBAT: Hero has %r HP" % hero.hp)
@@ -89,9 +89,9 @@ class Monster(object):
 
             if 'terror' in self.tags:
                 self.xp_value += 5
-                message_log.add("Hero is terrified!")
+                message_log.add("<LIGHTMAGENTA>Hero is terrified!")
                 hero.lose_morale(5)
-            message_log.add("Hero loses morale!")
+            message_log.add("<LIGHTMAGENTA>Hero loses morale!")
             hero.lose_morale(5)
 
             if 'loot' in self.tags:
@@ -144,7 +144,8 @@ class Monster(object):
             if self.hp <= 0:
                 self.hp = 0
                 monster_sprite.set_at(0, 0, fg=pytality.colors.LIGHTRED)
-                message_log.add("<WHITE>%s</> is defeated!" % self.name)
+                message_log.add("<LIGHTCYAN>%s</> defeated!" % self.name)
+                message_log.add("")
                 log.debug("COMBAT: Monster Defeated")
                 log.debug("")
                 hero.end_combat(self, dungeon)

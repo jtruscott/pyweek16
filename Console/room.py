@@ -213,7 +213,7 @@ class Level(pytality.buffer.Buffer):
 
                 hero.active_hero.morale -= 10
                 if hero.active_hero.morale > 0:
-                    dungeon.message_log.add("The hero loses 10 morale")
+                    dungeon.message_log.add("<LIGHTMAGENTA>Hero loses morale!")
                     dungeon.message_log.add("The hero rises again...")
                     hero.active_hero.hp = hero.active_hero.max_hp / 2
                 else:

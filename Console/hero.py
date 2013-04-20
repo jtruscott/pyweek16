@@ -381,6 +381,7 @@ class Hero(object):
         self.hp = min(self.max_hp, self.hp + amount)
 
     def level_up(self, message_log):
+        message_log.add("")
         message_log.add("<YELLOW>Hero leveled up!")
         self.level += 1
         self.gain_stat('max_hp', 10, message_log) #ew ew gross. but it's a fix.
@@ -393,6 +394,7 @@ class Hero(object):
         self.in_combat = False
         self.next_regen = self.regen_delay
         self.xp += monster.xp_value
+        dungeon.message_log.add("<YELLOW>Gained %i XP!" % monster.xp_value)
         if self.xp >= self.max_xp:
             self.xp -= self.max_xp
             self.level_up(dungeon.message_log)
