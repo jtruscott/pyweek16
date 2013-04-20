@@ -115,7 +115,7 @@ class StatDisplay(pytality.buffer.Box):
         else:
             self.monster_name.is_invisible = True
             self.monster_hp_text.is_invisible = True
-            self.hero_stat_text.is_invisible = True
+            self.hero_stat_text.is_invisible = False
             self.battle_header.is_invisible = True
         self.dirty = True
 
@@ -210,8 +210,7 @@ class Hero(object):
     regen_amount = 1
 
     def __init__(self):
-        self.hp = 75
-        self.max_hp = 100
+        self.hp = self.max_hp = 100
         self.next_regen = 0
 
         self.morale = 30
@@ -273,6 +272,9 @@ class Hero(object):
         return "hero3.ans"
 
     def morale_multiplier(self):
+        #REMOVE THIS FOR FINAL - DEBUG TESTING ONLY
+        #return 1
+
         # i checked and these are the exact brackets.
         # it's a little weird because of the line rounding.
         if self.morale >= 86:
