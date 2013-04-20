@@ -64,6 +64,7 @@ class Monster(object):
 
         if not self.started:
             self.started = True
+            #log.debug("hero morale %r, modifier %r" % (hero.morale,hero.morale_multiplier()))
             message_log.add("")
             message_log.add("<WHITE>%s</> appears!" % self.name)
             log.debug("")
@@ -90,9 +91,9 @@ class Monster(object):
 
             if 'terror' in self.tags:
                 self.xp_value += 5
-                hero.lose_morale(10)
+                hero.lose_morale(6)
             else:
-                hero.lose_morale(5)
+                hero.lose_morale(3)
 
 
 
