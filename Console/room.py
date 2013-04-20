@@ -212,16 +212,13 @@ class Level(pytality.buffer.Buffer):
                 hero.active_hero.in_combat = False
                 self.monster_sprite.is_invisible = True
 
-                hero.active_hero.morale -= 10
+                hero.active_hero.lose_morale(10)
                 if hero.active_hero.morale > 0:
                     self.hero_sprite.set_at(0, 0, fg=pytality.colors.WHITE)
                     dungeon.message_log.add("<LIGHTMAGENTA>Hero loses morale!")
                     dungeon.message_log.add("The hero rises again...")
                     hero.active_hero.hp = hero.active_hero.max_hp / 2
-                else:
-                    import game
-                    game.mode = "defeat"
-                    event.fire("defeat.setup")
+
                 self.dirty = True
 
     def center_map_on_hero(self):
