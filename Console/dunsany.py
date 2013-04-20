@@ -5,6 +5,7 @@ import data
 import time
 import sound
 import unittest
+import clickable
 
 class PretentiousPullQuote(object):
     def __init__(self):
@@ -78,7 +79,7 @@ class PretentiousPullQuote(object):
                 import game
                 import adventure
                 event.fire("adventure.setup")
-                adventure.active_adventure.load_option("burn_1")
+                adventure.active_adventure.start_act()
                 game.mode = "adventure"
 
         if self.i > self.end:
@@ -154,10 +155,53 @@ def dunsany_key(key):
 def dunsany_draw():
     active_quote.draw()
 
+active_text = None
+
+@event.on("victory.setup")
+def victory_setup():
+    global active_text
+    pytality.term.clear()
+    clickable.unregister_all()
+    active_text = pytality.buffer.PlainText(
+        "The final boss has been defeated. You win.",
+        y=main.screen_height / 2,
+        center_to=main.screen_width,
+        fg=pytality.colors.LIGHTGREEN
+    )
+
+@event.on("defeat.setup")
+def victory_setup():
+    global active_text
+    pytality.term.clear()
+    clickable.unregister_all()
+    active_text = pytality.buffer.PlainText(
+        "The hero has been defeated for good. You lose.",
+        y=main.screen_height / 2,
+        center_to=main.screen_width,
+        fg=pytality.colors.LIGHTRED
+    )
+
+@event.on("victory.draw")
+@event.on("defeat.draw")
+def endgame_draw():
+    active_text.draw()
 
 class Test(unittest.TestCase):
     def test_run(self):
         import game
         event.fire("dunsany.setup")
         game.mode = "dunsany"
+        game.start()
+
+
+    def test_defeat(self):
+        import game
+        event.fire("defeat.setup")
+        game.mode = "defeat"
+        game.start()
+
+    def test_victory(self):
+        import game
+        event.fire("victory.setup")
+        game.mode = "victory"
         game.start()

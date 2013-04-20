@@ -7,6 +7,7 @@ import data
 import random
 import clickable
 import time
+import sound
 
 import logging
 
@@ -17,6 +18,8 @@ class World(object):
     # fuck it, no instances, final destination, all class properties
     act = 1
     decisions = []
+    next_dungeon = None
+    finding = None
 
 class Option(object):
     def __init__(self, text="", text_kwargs=None, choices=None, choice_kwargs=None, timeout=None):
@@ -144,9 +147,9 @@ options = dict(
         text_kwargs=dict(x=10, y=12, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE),
         choice_kwargs=dict(y=51, height=7),
         choices=[
-            dict(set="next_dungeon", value="fire", next="end_act", text="Kidnap his girlfriend\n        at the\n      Fire Temple!", x=25, morale_bonus=70),
-            dict(set="next_dungeon", value="ogre", next="end_act", text="  Steal the shield   \n    and store it\n   with the Ogres!", x=55, morale_bonus=50),
-            dict(set="next_dungeon", value="crypt", next="end_act", text="    Kill everyone\n and raise zombies \n    in the Crypt!", x=85, morale_bonus=60),
+            dict(set="next_dungeon", value="fire", next="end_act1", text="Kidnap his girlfriend\n        at the\n      Fire Temple!", x=25, morale_bonus=70),
+            dict(set="next_dungeon", value="ogre", next="end_act1", text="  Steal the shield   \n    and store it\n   with the Ogres!", x=55, morale_bonus=50),
+            dict(set="next_dungeon", value="crypt", next="end_act1", text="    Kill everyone\n and raise zombies \n    in the Crypt!", x=85, morale_bonus=60),
         ]
     ),
     fetch_1=Option(
@@ -190,8 +193,8 @@ options = dict(
         text_kwargs=dict(x=10, y=12, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE),
         choice_kwargs=dict(y=51, height=6),
         choices=[
-            dict(set="next_dungeon", value="fire", next="end_act", text=" Get the Sword Of The Ages \nfrom the Eldritch Dragons", x=30, morale_bonus=80),
-            dict(set="next_dungeon", value="crypt", next="end_act", text=" Get the Armor Of The Ages \n  from the Haunted Tomb", x=70, morale_bonus=80),
+            dict(set="next_dungeon", value="fire", next="end_act2", text=" Get the Sword Of The Ages \nfrom the Eldritch Dragons", x=30, morale_bonus=80),
+            dict(set="next_dungeon", value="crypt", next="end_act2", text=" Get the Armor Of The Ages \n  from the Haunted Tomb", x=70, morale_bonus=80),
         ]
     ),
     final_1=Option(
@@ -231,7 +234,7 @@ options = dict(
         ]),
         choice_kwargs=dict(y=53, height=5),
         choices=[
-            dict(set="next_dungeon", value=None, next="end_act", text="   OK   ", x=63, y=53, morale_bonus=50),
+            dict(set="next_dungeon", value=None, next="end_act3", text="   OK   ", x=63, y=53, morale_bonus=50),
         ]
     ),
 )
@@ -268,6 +271,20 @@ class Adventure(object):
 
         self.root.dirty = True
 
+    def start_act(self):
+        clickable.unregister_all()
+        sound.play_music("Relax.mp3")
+        if World.act == 1:
+            self.load_option("burn_1")
+
+        elif World.act == 2:
+            self.load_option("fetch_1")
+
+        else:
+            self.load_option("final_1")
+
+        World.act += 1
+
     def choice_clicked(self, choice):
         clickable.unregister_all()
 
@@ -279,7 +296,18 @@ class Adventure(object):
             if hero.active_hero.morale > 100:
                 hero.active_hero.morale = 100
 
-        if choice.next == "end_act":
+        if choice.next == "end_act1":
+            if World.next_dungeon == "ogre":
+                World.finding = "shield"
+
+        if choice.next == "end_act2":
+            if World.next_dungeon == "fire":
+                World.finding = "sword"
+            else:
+                World.finding = "armor"
+
+
+        if "end_act" in choice.next:
             import game
             event.fire("dungeon.setup", World.next_dungeon)
             game.mode = "dungeon"

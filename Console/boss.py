@@ -8,6 +8,8 @@ import random
 import clickable
 import time
 import sound
+import monsters
+import adventure
 
 exchanges = [
     dict(
@@ -89,8 +91,8 @@ use more people willing to put out new ideas and really get their head in the ga
 
 class BattleSprite(pytality.buffer.Buffer):
     def __init__(self, width=16, height=16, crop=True, file_names=None, anim_delay=5, **kwargs):
-        super(BattleSprite, self).__init__(width=width, height=width, **kwargs)
-        self.sprites = [data.load_buffer(file_name, width=width, crop=crop) for file_name in file_names]
+        super(BattleSprite, self).__init__(width=width, height=height, **kwargs)
+        self.sprites = [data.load_buffer(file_name, width=width, crop=crop, max_height=height) for file_name in file_names]
         self.overlay = overlay.Overlay(width=width, height=width, x=0, y=0)
         self.children = [self.sprites[0], self.overlay]
         self.anim_delay = self.anim_timer = anim_delay
@@ -142,7 +144,7 @@ class ActionWindow(pytality.buffer.Box):
 
 
 class Battle(object):
-    def __init__(self, dungeon):
+    def __init__(self, dungeon, final_boss):
         sidebar_width = 26
         bottom_height = 17
 
@@ -173,7 +175,7 @@ class Battle(object):
             x=0, y=0
         )
 
-        self.real_boss = False
+        self.real_boss = final_boss
         if self.real_boss:
             self.boss_sprite = BattleSprite(file_names=["finalboss.ans"], width=61, height=48, x=self.battle_window.width - 61, y=0, crop=True)
             self.boss_portrait = data.load_buffer("finalbossport.ans", width=16, crop=True)
@@ -182,6 +184,11 @@ class Battle(object):
             self.boss_sprite = BattleSprite(file_names=["you2.ans", "you2alt.ans"], width=34, height=31, x=self.battle_window.width - 40, y=14, crop=True)
             self.boss_portrait = data.load_buffer("youport.ans", width=16, crop=True)
             sound.play_music("OHC_Changeling_Rumble.mp3")
+
+        act = (adventure.World.act - 1)
+        self.boss_attack = 15 + (10 * act)
+        self.boss_defense = 15 + (10 * act)
+        self.boss_hp = 60 + (20 * act)
 
         self.hero_sprite = BattleSprite(file_names=[hero.active_hero.get_boss_file()], width=18, height=15, x=10, y=30)
         self.hero_portrait = data.load_buffer("heroportrait.ans", width=16, crop=True)
@@ -208,6 +215,9 @@ class Battle(object):
         self.after_animation_state = None
         self.state_delay = 5
 
+        self.pending_attack_type = None
+        self.pending_attack_powerful = False
+
     def tick(self):
         self.i += 1
         if self.i % 15 == 0:
@@ -233,6 +243,29 @@ class Battle(object):
             self.state_delay = None
 
             if self.next_state == "hero_talk":
+                if self.pending_attack_type:
+                    self.pending_attack_type = None
+                    self.message_log.add("The boss strikes!")
+                    if self.pending_attack_type == "phys":
+                        hero.active_hero.hp -= monsters.combat(self.boss_attack, hero.active_hero.defense * hero.active_hero.morale_multiplier(), powerful=self.pending_attack_powerful, durable=False)
+                    else:
+                        hero.active_hero.hp -= monsters.combat(self.boss_attack, hero.active_hero.m_defense * hero.active_hero.morale_multiplier(), powerful=self.pending_attack_powerful, durable=False)
+
+                    if hero.active_hero.hp <= 0:
+                        self.message_log.add("The hero is defeated!")
+                        hero.active_hero.hp = 0
+                        self.hero_sprite.animate("fade_out", anim_speed=8)
+                        self.next_state = "hero_defeated"
+                        self.state_delay = self.hero_sprite.width * self.hero_sprite.height / 8 + 2
+
+                    else:
+                        hero.active_hero.morale += 3
+                        if self.pending_attack_powerful:
+                            hero.active_hero.morale += 3
+
+                        if hero.active_hero.morale > 100:
+                            hero.active_hero.morale = 100
+
                 choice = random.choice(exchanges)
                 self.show_dialog("hero", choice['hero'], "hero_attack", 0)
                 self.next_choice = choice
@@ -248,7 +281,16 @@ class Battle(object):
                 self.state_delay = 15
 
             elif self.next_state == "boss_choose":
-                self.offer_choices(self.next_choice['choices'])
+                self.message_log.add("The hero strikes!")
+                self.boss_hp -= monsters.combat(hero.active_hero.attack * hero.active_hero.morale_multiplier(), self.boss_defense, powerful=False, durable=False)
+                if self.boss_hp <= 0:
+                    self.message_log.add("The boss is defeated!")
+                    self.boss_hp = 0
+                    self.boss_sprite.animate("fade_out", anim_speed=16)
+                    self.next_state = "boss_defeated"
+                    self.state_delay = self.boss_sprite.width * self.boss_sprite.height / 16 + 2
+                else:
+                    self.offer_choices(self.next_choice['choices'])
 
             elif self.next_state == "boss_attack":
                 self.boss_sprite.animate("flash")
@@ -260,6 +302,20 @@ class Battle(object):
                 self.next_state = "hero_talk"
                 self.state_delay = 15
 
+            elif self.next_state == "boss_defeated":
+                import game
+                if self.real_boss:
+                    game.mode = "victory"
+                    event.fire("victory.setup")
+                else:
+                    game.mode = "adventure"
+                    adventure.active_adventure.start_act()
+
+            elif self.next_state == "hero_defeated":
+                import game
+                game.mode = "defeat"
+                event.fire("defeat.setup")
+
 
     def show_dialog(self, source, text, next_state, state_delay=None):
         if source == "hero":
@@ -268,17 +324,17 @@ class Battle(object):
         else:
             portrait = self.boss_portrait
             if self.real_boss:
-                title = "GRGRGFGR"
+                title = "World-Devourer"
             else:
                 title = "Skulltaker"
 
-        portrait.x = 0
+        portrait.x = 1
         portrait.y = 1
         title_buffer = pytality.buffer.PlainText(
             title.center(portrait.width),
             fg=pytality.colors.WHITE
         )
-        title_buffer.x = 0
+        title_buffer.x = 1
         title_buffer.y = 13
 
         text_buffer = ClickableText(
@@ -312,6 +368,22 @@ class Battle(object):
         self.state_delay = dialog.state_delay
 
     def offer_choices(self, choices):
+
+        if self.real_boss:
+            self.pending_attack_type = random.choice(["phys", "magic"])
+            self.pending_attack_powerful = random.choice([False, True])
+            text = "<LIGHTMAGENTA>" + random.choice([
+                "GRAAAALRGLARGLARLGALRLLALGLLLALLLGLLALGLLAGRLRLALBLBBALGBLBALGBLBLABLAGLALALFL",
+                "GLOORPAAAARPLLALARALRALAPAPRLAPARLALAPRALLPARPAAAAARLPALAAALPALLPALPALPALAAAPL",
+                "AAAGLGLGLAPRALGPALRAPLAGAAAAARGAGLAGPARALPAAAALPGLARAPLAGAAAALRLPARLPAALAAAALL",
+            ] + [
+                ''.join(random.choice('GLARB') for _ in range(80))
+                for __ in range(5)
+            ]
+            )
+            self.show_dialog("you", text, "boss_attack", 0)
+            return
+
         self.choice_boxes = []
         self.action_window.children = [
             self.action_window.title,
@@ -322,20 +394,38 @@ class Battle(object):
                 fg=pytality.colors.WHITE,
             )
         ]
-
+        box_width = 40
+        power_attack = random.choice([0, 1])
         for i, choice in enumerate(choices):
-            text = pytality.buffer.RichText(choice['title'], y=1, x=1)
+            attack_type = random.choice(["phys", "magic"])
+            attack_powerful = (i == power_attack)
+
+            box_children = [
+                pytality.buffer.RichText(choice['title'].center(box_width-2), y=1, x=0),
+            ]
+            if attack_type == "phys":
+                box_children.append(pytality.buffer.PlainText("Physical Attack", fg=pytality.colors.LIGHTMAGENTA, center_to=box_width-2, y=3, x=0))
+            else:
+                box_children.append(pytality.buffer.PlainText("Magical Attack", fg=pytality.colors.YELLOW, center_to=box_width-2, y=3, x=0))
+
+            if attack_powerful:
+                box_children.append(pytality.buffer.PlainText("Powerful", fg=pytality.colors.RED, center_to=box_width-2, y=4, x=0))
+
             choice_box = clickable.ClickableBox(
-                width=40, height=8,
+                width=box_width, height=8,
                 x=8 + 47 * i, y=3,
                 x_offset=self.action_window.x,
                 y_offset=self.action_window.y + 1,
                 boxtype=pytality.boxtypes.BoxSingle,
                 border_fg=pytality.colors.DARKGREY,
-                children=[text],
+                children=box_children,
                 on_mouse_down=self.box_clicked
             )
             choice_box.choice = choice
+
+            choice_box.attack_type = attack_type
+            choice_box.attack_powerful = attack_powerful
+
             self.choice_boxes.append(choice_box)
             clickable.register(choice_box)
             self.action_window.children.append(choice_box)
@@ -344,6 +434,9 @@ class Battle(object):
 
     def box_clicked(self, box, x, y):
         clickable.unregister_all()
+
+        self.pending_attack_type = box.attack_type
+        self.pending_attack_powerful = box.attack_powerful
 
         self.show_dialog("you", box.choice['text'], "boss_attack", 0)
 
@@ -382,8 +475,28 @@ active_battle = None
 
 @event.on("boss.setup")
 def boss_setup(dungeon):
+    hero.active_hero.hp = hero.active_hero.max_hp
+
+    if adventure.World.finding == "shield":
+        dungeon.message_log.add("Hero found: \n<WHITE>\x07</> <BROWN>Family Shield</>")
+        hero.active_hero.has_shield = True
+        hero.active_hero.gain_stat('defense', 10, dungeon.message_log)
+        hero.active_hero.gain_stat('m_defense', 10, dungeon.message_log)
+
+    if adventure.World.finding == "sword":
+        dungeon.message_log.add("Hero found: \n<WHITE>\x07</> <BROWN>Sword Of The Ages</>")
+        hero.active_hero.has_sword = True
+        hero.active_hero.gain_stat('attack', 10, dungeon.message_log)
+
+    if adventure.World.finding == "armor":
+        dungeon.message_log.add("Hero found: \n<WHITE>\x07</> <BROWN>Armor Of The Ages</>")
+        hero.active_hero.has_armor = True
+        hero.active_hero.gain_stat('m_defense', 10, dungeon.message_log)
+
+    adventure.World.finding = None
+
     global active_battle
-    active_battle = Battle(dungeon)
+    active_battle = Battle(dungeon, final_boss=(adventure.World.act > 3))
 
 
 @event.on("boss.tick")
@@ -404,6 +517,10 @@ class Test(unittest.TestCase):
         import dungeon
         import game
         event.fire("setup")
+        event.fire("adventure.setup")
+        adventure.active_adventure.start_act()
+        adventure.active_adventure.start_act()
+        adventure.active_adventure.start_act()
         event.fire("dungeon.setup")
         game.mode = "boss"
         event.fire("boss.setup", dungeon.active_dungeon)
