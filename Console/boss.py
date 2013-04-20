@@ -243,9 +243,9 @@ class Battle(object):
             sound.play_music("OHC_Changeling_Rumble.mp3")
 
         act = (adventure.World.act - 1)
-        self.boss_attack = 3 + (25 * act)
-        self.boss_defense = 10 + (10 * act)
-        self.boss_hp = self.boss_max_hp = 60 + (20 * act)
+        self.boss_attack = 4 + (7 * act)
+        self.boss_defense = 4 + (7 * act)
+        self.boss_hp = self.boss_max_hp = 45 + (20 * act)
 
         self.hero_sprite = BattleSprite(file_names=[hero.active_hero.get_boss_file()], width=18, height=15, x=10, y=30)
         self.hero_portrait = data.load_buffer("heroportrait.ans", width=16, crop=True)
