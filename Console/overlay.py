@@ -8,7 +8,7 @@ class Overlay(pytality.buffer.Buffer):
         super(Overlay, self).__init__(is_overlay=True, is_invisible=True, **kwargs)
 
 
-    def start(self, anim_type, anim_speed=64, owner=None, color=None):
+    def start(self, anim_type, anim_speed=64, owner=None, color=None, restrict=False):
         self.animation = anim_type
         self.is_invisible = False
         self.empty_cells = set()
@@ -21,7 +21,8 @@ class Overlay(pytality.buffer.Buffer):
             for y in range(self.height):
                 if anim_type == "fade_out":
                     self._data[y][x][2] = ' '
-                    self.empty_cells.add((y, x))
+                    if not restrict or (y < owner.height and x < owner.width and not (owner._data[y][x][2] == ' ' and owner._data[y][x][1] == pytality.colors.BLACK)):
+                        self.empty_cells.add((y, x))
 
                 elif anim_type == "fade_in":
                     self._data[y][x][2] = '\xDB'

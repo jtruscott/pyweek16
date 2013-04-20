@@ -253,10 +253,11 @@ class Battle(object):
 
                     if hero.active_hero.hp <= 0:
                         self.message_log.add("The hero is defeated!")
+                        clickable.unregister_all()
                         hero.active_hero.hp = 0
-                        self.hero_sprite.animate("fade_out", anim_speed=8)
+                        self.hero_sprite.animate("fade_out", anim_speed=3, restrict=True)
                         self.next_state = "hero_defeated"
-                        self.state_delay = self.hero_sprite.width * self.hero_sprite.height / 8 + 2
+                        self.state_delay = len(self.hero_sprite.overlay.empty_cells) / 3 + 5
 
                     else:
                         hero.active_hero.morale += 3
@@ -285,10 +286,11 @@ class Battle(object):
                 self.boss_hp -= monsters.combat(hero.active_hero.attack * hero.active_hero.morale_multiplier(), self.boss_defense, powerful=False, durable=False)
                 if self.boss_hp <= 0:
                     self.message_log.add("The boss is defeated!")
+                    clickable.unregister_all()
                     self.boss_hp = 0
-                    self.boss_sprite.animate("fade_out", anim_speed=16)
+                    self.boss_sprite.animate("fade_out", anim_speed=12, restrict=True)
                     self.next_state = "boss_defeated"
-                    self.state_delay = self.boss_sprite.width * self.boss_sprite.height / 16 + 2
+                    self.state_delay = len(self.boss_sprite.overlay.empty_cells) / 12 + 5
                 else:
                     self.offer_choices(self.next_choice['choices'])
 
@@ -518,9 +520,9 @@ class Test(unittest.TestCase):
         import game
         event.fire("setup")
         event.fire("adventure.setup")
-        adventure.active_adventure.start_act()
-        adventure.active_adventure.start_act()
-        adventure.active_adventure.start_act()
+        #adventure.active_adventure.start_act()
+        #adventure.active_adventure.start_act()
+        #adventure.active_adventure.start_act()
         event.fire("dungeon.setup")
         game.mode = "boss"
         event.fire("boss.setup", dungeon.active_dungeon)
