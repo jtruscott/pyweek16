@@ -39,15 +39,63 @@ class PretentiousPullQuote(object):
             at_i += 7
 
         self.end = at_i + 7
+        self.fire_end = None
 
-        self.title = data.load_buffer("wip1.ans", width=80, crop=False)
-        self.title.x = (main.screen_width / 2) - (80 / 2)
+        self.title_tl_bg = data.load_buffer("itsfullofstars.ans", width=22, crop=True)
+        self.title_tr_bg = data.load_buffer("itsfullofstars.ans", width=22, crop=True)
+        self.title_tl = data.load_buffer("aswasforet1b-1.ans", width=80, crop=False)
+        self.title_tr = data.load_buffer("aswasforet1b-2.ans", width=42, crop=True)
+        self.title_bl = data.load_buffer("town1b-1.ans", width=80, crop=False)
+        self.title_br = data.load_buffer("town1b-2.ans", width=75, crop=True)
+
+        self.title_bl_fire = data.load_buffer("town1b-1fire.ans", width=80, crop=False)
+        self.title_br_fire = data.load_buffer("town1b-2fire.ans", width=75, crop=True)
+        self.title_tl.x = 15
+        self.title_tr.x = 80 + 15
+        self.title_tr_bg.x = main.screen_width - 22
+
+        self.title_bl.y = self.title_bl_fire.y = main.screen_height - self.title_br.height + 1
+        self.title_br.y = self.title_br_fire.y = main.screen_height - self.title_br.height + 1
+        self.title_br.x = self.title_br_fire.x = 80
+
+        self.start_text = pytality.buffer.PlainText("[ Click To Start ]", fg=pytality.colors.WHITE, y=65 / 2)
+        self.start_text.x = (main.screen_width - self.start_text.width) / 2
+
+        self.credits_text = pytality.buffer.RichText(
+            "<DARKGREY>  Game By: Jesse Truscott & Joe Gracyk" +
+            "                     Art: Devin Vance" +
+            "                     Writing: Dylan P??????" +
+            "                     Music: Patashu "
+        )
 
         self.root = pytality.buffer.Buffer(height=main.screen_height, width=main.screen_width, children=lines)
 
     def tick(self):
+        if self.fire_end and self.i > self.fire_end:
+                # and now fire adventure mode
+                import game
+                import adventure
+                event.fire("adventure.setup")
+                adventure.active_adventure.load_option("burn_1")
+                game.mode = "adventure"
+
         if self.i > self.end:
-            self.root.children = [self.title]
+            self.root.children = [
+                self.title_tl_bg, self.title_tr_bg,
+                self.title_tl, self.title_tr,
+                self.title_bl, self.title_br,
+                self.start_text, self.credits_text
+            ]
+            if self.fire_end:
+                self.root.children += [self.title_bl_fire, self.title_br_fire]
+
+            if self.i % 15 == 7:
+                self.start_text.fg = pytality.colors.WHITE
+                self.start_text.update_data()
+            elif self.i % 15 == 0:
+                self.start_text.fg = pytality.colors.LIGHTGREY
+                self.start_text.update_data()
+                self.root.dirty = True
 
         self.i += 1
         while self.stages and self.i >= self.stages[0][0]:
@@ -61,39 +109,13 @@ class PretentiousPullQuote(object):
         elif self.i < self.end:
             self.i = self.end
         else:
-            # transition to adventure mode
-            fullscreen_flash = pytality.buffer.Buffer(
-                height=main.screen_height,
-                width=main.screen_width
-            )
-            transition_frames = [
-                [pytality.colors.DARKGREY, pytality.colors.BLACK, '\xDB'],
-                [pytality.colors.DARKGREY, pytality.colors.BLACK, '\xB1'],
-                [pytality.colors.DARKGREY, pytality.colors.BLACK, '\xDB'],
-                [pytality.colors.LIGHTGREY, pytality.colors.DARKGREY, '\xB1'],
-                [pytality.colors.LIGHTGREY, pytality.colors.DARKGREY, '\xDB'],
-                [pytality.colors.WHITE, pytality.colors.LIGHTGREY, '\xB1'],
-                [pytality.colors.WHITE, pytality.colors.LIGHTGREY, '\xDB'],
-            ]
-            for fg, bg, ch in transition_frames:
-                start = time.time()
+            if not self.fire_end:
+                # set the town on fire
+                self.start_text.set("    Starting...   ")
+                self.fire_end = self.i + 15
 
-                for row in fullscreen_flash._data:
-                    for col in row:
-                        col[:] = [fg, bg, ch]
-
-                fullscreen_flash.draw(dirty=True)
-                pytality.term.flip()
-                # do this at about 10fps.
-                delay = 1.0/10
-                time.sleep(min(delay, max(0, time.time() - start + delay)))
-
-            # and now fire adventure mode
-            import game
-            import adventure
-            event.fire("adventure.setup")
-            adventure.active_adventure.load_option("burn_1")
-            game.mode = "adventure"
+            else:
+                self.i = self.fire_end
 
         self.tick()
 

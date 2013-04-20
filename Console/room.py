@@ -223,6 +223,7 @@ class Level(pytality.buffer.Buffer):
 import unittest
 class Test(unittest.TestCase):
     def test_pathing(self):
+        from dungeon import room_map
         for room_type in room_map.values():
             for room in room_type:
                 print 'room:', room

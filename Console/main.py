@@ -4,6 +4,7 @@ import game
 import sys
 import traceback
 import logging
+import sound
 
 log = logging.getLogger(__name__)
 log.debug("Starting up")
@@ -20,6 +21,10 @@ def main():
     pytality.term.set_title('...As Was Foretold (PyWeek #16)')
     pytality.term.set_cursor_type(2)
     pytality.term.clear()
+
+    if '--no-sound' in sys.argv:
+        sys.argv.remove('--no-sound')
+        sound.no_sound = True
 
     if 'load-image' in sys.argv:
         # hack to view images easily

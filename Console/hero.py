@@ -19,20 +19,23 @@ class MoraleMeter(pytality.buffer.Buffer):
         self.children = [self.title, self.meter] + self.text_lines
         self.last_value = None
 
-    def tick(self):
-        if (active_hero.morale, active_hero.max_morale) == self.last_value:
+    def tick(self, mode):
+        if (active_hero.morale, active_hero.max_morale, mode) == self.last_value:
             return
 
-        self.last_value = (active_hero.morale, active_hero.max_morale)
+        self.last_value = (active_hero.morale, active_hero.max_morale, mode)
 
         filled_rows = int(15.0 * active_hero.morale / active_hero.max_morale)
         for i, line in enumerate(self.text_lines):
             row_target = i*3 + 1
             if filled_rows >= row_target and filled_rows < row_target + 3:
-                if filled_rows > 7:
-                    line.format(("WHITE", "LIGHTGREEN"))
+                if mode == "dungeon" or mode == "battle":
+                    if filled_rows > 7:
+                        line.format(("WHITE", "LIGHTGREEN"))
+                    else:
+                        line.format(("WHITE", "LIGHTRED"))
                 else:
-                    line.format(("WHITE", "LIGHTRED"))
+                    line.format(("WHITE", "BLACK"))
             else:
                 line.format(("DARKGREY", "BLACK"))
 
@@ -94,7 +97,7 @@ class StatDisplay(pytality.buffer.Box):
             self.morale_meter
         ])
 
-        self.mode = "dungeon"
+        self.mode = "adventure"
         self.tick()
 
     def set_mode(self, mode):
@@ -193,7 +196,7 @@ class StatDisplay(pytality.buffer.Box):
         else:
             battle = owner
 
-        self.morale_meter.tick()
+        self.morale_meter.tick(self.mode)
 
 active_hero = None
 stat_display = None
@@ -211,7 +214,7 @@ class Hero(object):
         self.max_hp = 100
         self.next_regen = 0
 
-        self.morale = 100
+        self.morale = 30
         self.max_morale = 100
 
         self.xp = 0
