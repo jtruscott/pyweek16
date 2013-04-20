@@ -60,6 +60,7 @@ class ClickableBox(pytality.buffer.Box):
     def __init__(self,
             hover_interior_bg=pytality.colors.BLACK, hover_border_bg=pytality.colors.BLACK,
             hover_interior_fg=pytality.colors.WHITE, hover_border_fg=pytality.colors.WHITE,
+            on_mouse_down=None,
             **kwargs):
 
         super(ClickableBox, self).__init__(**kwargs)
@@ -69,6 +70,7 @@ class ClickableBox(pytality.buffer.Box):
         )
         self._regular_data = self._data
         self._hover_data = pytality.buffer.Box(**kwargs)._data
+        self.on_mouse_down = on_mouse_down
 
     def mouse_in(self, x, y):
         #print 'in', self, x, y
@@ -82,7 +84,8 @@ class ClickableBox(pytality.buffer.Box):
 
     def mouse_down(self, x, y):
         #print 'down', self, x, y
-        pass
+        if self.on_mouse_down:
+            self.on_mouse_down(self, x, y)
 
 
 

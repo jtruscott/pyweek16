@@ -38,10 +38,16 @@ class Choice(clickable.ClickableBox):
         self.set = set
         self.value = value
         self.next = next
+
+        children = [self.inner_text]
+        if 'children' in kwargs:
+            children.extend(kwargs['children'])
+            del kwargs['children']
+
         super(Choice, self).__init__(
             height=height,
             width=self.inner_text.width + 4,
-            children=[self.inner_text],
+            children=children,
             boxtype=pytality.boxtypes.BoxSingle,
             border_bg=pytality.colors.BROWN, border_fg=pytality.colors.YELLOW,
             interior_bg=pytality.colors.LIGHTGREY, interior_fg=pytality.colors.BLACK,
@@ -67,22 +73,35 @@ class Choice(clickable.ClickableBox):
 options = dict(
     burn_1=Option(
         text="""
-                               <RED>Burn Down The Village!</>
+                    <RED>SKULLTAKER:</>
+
+                    So, brief recap of the project we've got set up. This is Idylburg.
+                    Small town, high happiness rates, low property tax. Horrible place.
+                    Our Department of Prophecy and Malfeasance has picked out a young man
+                    here, born under the exact right signs and portents, who will be the CO
+                    of this age.
+
+                    I'm thrilled to be working together with such a talented, driven group
+                    of individuals on this, I have to say. I really feel like we've got the
+                    ambition and the initiative to really take this project places. I think,
+                    given a few moments to appraise this situation, you'll pick out our target
+                    pretty easily.
 
 
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer a sem aliquam
 
-Nulla accumsan porta ligula, eu lacinia arcu euismod et. Maecenas suscipit semper
 
-  blandit tincidunt. Praesent scelerisque urna a ligula elementum dignissim.
 
-  imperdiet semper. Vestibulum mauris dui, commodo vitae consequat dapibus,
+                    <GREEN>HERO:</>
 
-accumsan malesuada a quis turpis. Vivamus quis est velit. Nam at cursus nibh.
+                    I can not explain it, my love! I can feel a wind curling in my soul,
+                    and that wind... is Destiny!
 """,
-        text_kwargs=dict(y=25, x=25, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE),
+        text_kwargs=dict(y=15, x=15, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE, children=[
+            data.load_buffer("youport-white.ans", width=18, max_height=12, crop=True, y=1),
+            data.load_buffer("heroportrait-white.ans", width=18, max_height=12, crop=True, y=19)
+        ]),
         choice_kwargs=dict(
-            y=50,
+            y=50
         ),
         choices=[
             dict(set="killed_father", value=True, next="burn_2", text="Kill His Father!", x=35),

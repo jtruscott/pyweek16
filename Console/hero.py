@@ -63,7 +63,7 @@ class StatDisplay(pytality.buffer.Box):
         self.title = pytality.buffer.PlainText("[ Hero Stats ]", y=-1, fg=pytality.colors.WHITE)
         self.title.x = (self.inner_width / 2) - (self.title.width / 2)
 
-        self.hero_name = pytality.buffer.PlainText("BARTLEBUS THE MIGHTY", y=2, fg=pytality.colors.WHITE, center_to=self.inner_width)
+        self.hero_name = pytality.buffer.PlainText("Altrune The Bold", y=2, fg=pytality.colors.WHITE, center_to=self.inner_width)
         self.hero_level = pytality.buffer.PlainText("Level %i", y=3, fg=pytality.colors.LIGHTGREY, center_to=self.inner_width)
         self.hero_hp_text = pytality.buffer.RichText("", y=5)
         self.hero_hp_bar = pytality.buffer.Buffer(width=21, height=1, y=6, x=(self.inner_width / 2 - 10))
