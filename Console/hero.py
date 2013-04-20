@@ -396,7 +396,7 @@ class Hero(object):
 
         if 'loot' in monster.tags:
             self.make_item(random.randint(1, 2), dungeon.message_log)
-        elif random.randint(1, 4) == 1:
+        elif random.randint(1, 2) == 1:
             self.make_item(1, dungeon.message_log)
 
     def dungeon_tick(self, dungeon):

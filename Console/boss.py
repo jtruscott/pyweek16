@@ -301,7 +301,6 @@ class Battle(object):
 
             if self.next_state == "hero_talk":
                 if self.pending_attack_type:
-                    self.pending_attack_type = None
                     if self.pending_attack_type == "phys":
                         self.message_log.add("The boss strikes!")
                         damage = monsters.combat(self.boss_attack, hero.active_hero.defense * hero.active_hero.morale_multiplier(), powerful=self.pending_attack_powerful, durable=False)
@@ -312,6 +311,8 @@ class Battle(object):
                         damage= monsters.combat(self.boss_attack, hero.active_hero.m_defense * hero.active_hero.morale_multiplier(), powerful=self.pending_attack_powerful, durable=False)
                         self.message_log.add("%s damage!" % damage)
                         hero.active_hero.hp -= damage
+
+                    self.pending_attack_type = None
 
                     if hero.active_hero.hp <= 0:
                         self.message_log.add("The hero is defeated!")
@@ -324,7 +325,7 @@ class Battle(object):
                     elif not self.real_boss:
                         hero.active_hero.morale += 5
                         if self.pending_attack_powerful:
-                            hero.active_hero.morale += 5
+                            hero.active_hero.morale += 10
 
                         if hero.active_hero.morale > 100:
                             hero.active_hero.morale = 100
