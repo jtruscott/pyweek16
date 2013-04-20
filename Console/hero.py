@@ -321,8 +321,22 @@ class Hero(object):
         name = "%s of %s" % (slot, enchantment)
         self.equipment[slot] = name
         effect = random.choice(['attack', 'defense', 'm_defense'])
-        setattr(self, effect, getattr(self, effect) + power)
         message_log.add("Hero found: \n<WHITE>\x07</> <BROWN>%s</>" % name)
+        self.gain_stat(effect,power,message_log)
+
+    def gain_stat(self,stat,gain,message_log):
+        setattr(self, stat, getattr(self, stat) + gain)
+
+        stat_text = {
+            'attack' : 'Attack',
+            'defense' : 'Defense',
+            'm_defense' : 'M.Defense',
+            'max_hp' : 'Max HP',
+            'hp' : 'HP',
+            'xp' : 'XP'
+        }
+
+        message_log.add("Hero gains +%i %s!" % (gain, stat_text[stat]))
 
     def lose_morale(self, loss):
         self.morale -= loss
@@ -341,11 +355,11 @@ class Hero(object):
             dungeon.message_log.add("<YELLOW>Hero leveled up!")
             self.level += 1
             self.xp -= self.max_xp
-            self.max_hp += 10
+            self.gain_stat('max_hp',10,dungeon.message_log) #ew ew gross. but it's a fix.
             self.hp = self.max_hp
-            self.attack += 2
-            self.defense += 2
-            self.m_defense += 2
+            self.gain_stat('attack',2,dungeon.message_log)
+            self.gain_stat('defense',2,dungeon.message_log)
+            self.gain_stat('m_defense',2,dungeon.message_log)
 
         if 'loot' in monster.tags:
             self.make_item(random.randint(1, 2), dungeon.message_log)
