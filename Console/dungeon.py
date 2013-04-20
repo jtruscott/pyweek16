@@ -11,6 +11,7 @@ import message
 import monsters
 import event
 import sound
+import clickable
 
 log = logging.getLogger(__name__)
 
@@ -77,6 +78,8 @@ def generate_level(size, **kwargs):
 
     return Level(rooms, room_list, **kwargs)
 
+shown_tutorial = False
+
 class Dungeon(object):
     def __init__(self, monster_type):
         sidebar_width = 26
@@ -112,8 +115,72 @@ class Dungeon(object):
         ])
         self.i = 0
         self.message_log.add("The hero sets out.")
+        self.tutorial_items = []
+        if not shown_tutorial:
+            def make_box(text, **kwargs):
+                text = pytality.buffer.RichText(text.strip(), initial_color=pytality.colors.WHITE, x=1, y=1)
+
+                item = clickable.ClickableBox(
+                    height=text.height + 4,
+                    width=text.width + 4,
+                    children=[text],
+                    boxtype=pytality.boxtypes.BoxSingle,
+                    border_bg=pytality.colors.BROWN, border_fg=pytality.colors.LIGHTGREY,
+                    interior_bg=pytality.colors.BLACK, interior_fg=pytality.colors.BLACK,
+                    hover_interior_bg=pytality.colors.BLACK, hover_interior_fg=pytality.colors.BLACK,
+                    hover_border_bg=pytality.colors.BROWN, hover_border_fg=pytality.colors.YELLOW,
+                    on_mouse_down=self.tutorial_dismiss,
+                    **kwargs
+                )
+                clickable.register(item)
+                self.tutorial_items.append(item)
+
+            make_box(text="""
+Assist the hero's advancement by helpfully sending monsters at him!
+
+Try not to kill him, though - that's very demoralizing. And if he
+runs out of morale completely, he'll give up the heroism business.
+""", x=45, y=33)
+
+            make_box(text="""
+Send monsters at the hero by clicking at the card. You'll get new
+monster cards when the hero is out of combat. Each monster has two
+special effects - be careful about what you send into battle!
+""", x=45, y=53)
+
+            make_box(text="""
+Watch the hero's
+stats - If he dies
+he'll lose morale.
+""", x=131, y=15)
+            make_box(text="""
+The morale meter
+will regenerate
+when very low,
+and affects the
+hero's stats.
+""", x=133, y=35)
+            make_box(text="""
+This message log
+will help keep
+track of what's
+going on.
+""", x=2, y=35)
+
+
+    def tutorial_dismiss(self, box, x, y):
+        for item in self.tutorial_items:
+            clickable.unregister(item)
+        self.tutorial_items = []
+        global shown_tutorial
+        shown_tutorial = True
+        self.root.dirty = True
 
     def tick(self):
+        if self.tutorial_items and self.i:
+            # pause the world while this is up
+            return
+
         self.i += 1
         if self.i % 15 == 0:
             # safety margin
@@ -130,6 +197,8 @@ class Dungeon(object):
 
     def draw(self):
         self.root.draw()
+        for tutorial_item in self.tutorial_items:
+            tutorial_item.draw(dirty=True)
 
 active_dungeon = None
 
