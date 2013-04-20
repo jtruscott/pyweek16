@@ -254,8 +254,8 @@ class Hero(object):
     defeated = False
     in_combat = False
 
-    regen_delay = 2
-    regen_amount = 1
+    regen_delay = 4
+    regen_amount = 2
 
     def __init__(self):
         self.hp = self.max_hp = 100
@@ -321,9 +321,6 @@ class Hero(object):
         return "hero3.ans"
 
     def morale_multiplier(self):
-        #REMOVE THIS FOR FINAL - DEBUG TESTING ONLY
-        #return 1
-
         # i checked and these are the exact brackets.
         # it's a little weird because of the line rounding.
         if self.morale > 86:
@@ -433,7 +430,7 @@ class Hero(object):
                 self.next_regen = self.regen_delay
                 self.gain_hp(self.regen_amount)
 
-                if self.morale < 40:
+                if self.morale < 27:
                     self.morale += 1
 
 @event.on('setup')
