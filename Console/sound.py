@@ -22,7 +22,7 @@ def setup_sound():
     pygame.mixer.pre_init(44100, -16, 2, 1024)
     pygame.mixer.init()
 
-def play(filename, queue=False, restart=False):
+def play_music(filename, queue=False, restart=False):
     if no_sound:
         return
 
@@ -32,8 +32,12 @@ def play(filename, queue=False, restart=False):
 
     log.debug("playing sound %r", filename)
     filename = os.path.join(data_dir, filename)
-    pygame.mixer.music.load(filename)
-    pygame.mixer.music.play(-1)
+    try:
+        pygame.mixer.music.load(filename)
+        pygame.mixer.music.play(-1)
+    except Exception as e:
+        log.exception(e)
+
     last_sound = filename
 
 import unittest
@@ -42,7 +46,7 @@ class Test(unittest.TestCase):
         import time
         setup_sound()
         #play('OHC_Changeling_Rumble.mp3')
-        play('Catastrophe_Strikes.mp3')
+        play_music('Catastrophe_Strikes.mp3')
 
         while pygame.mixer.music.get_busy():
             pytality.term.flip()
