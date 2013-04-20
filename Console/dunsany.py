@@ -163,10 +163,13 @@ def victory_setup():
     pytality.term.clear()
     clickable.unregister_all()
     active_text = pytality.buffer.PlainText(
-        "The final boss has been defeated. You win.",
-        y=main.screen_height / 2,
+        "The final boss has been defeated. The world is saved. You win.",
+        y=main.screen_height / 2 + 10,
         center_to=main.screen_width,
-        fg=pytality.colors.LIGHTGREEN
+        fg=pytality.colors.LIGHTGREEN,
+        children=[
+            data.load_buffer("earf.ans", width=40, x=(main.screen_width - 40) / 2, y=-30, crop=True)
+        ]
     )
 
 @event.on("defeat.setup")
@@ -176,9 +179,12 @@ def victory_setup():
     clickable.unregister_all()
     active_text = pytality.buffer.PlainText(
         "The hero has been defeated for good. You lose.",
-        y=main.screen_height / 2,
+        y=main.screen_height / 2 + 10,
         center_to=main.screen_width,
-        fg=pytality.colors.LIGHTRED
+        fg=pytality.colors.LIGHTRED,
+        children=[
+            data.load_buffer("grave.ans", width=42, x=(main.screen_width - 42) / 2, y=-15, crop=True)
+        ]
     )
 
 @event.on("moraledefeat.setup")
@@ -188,9 +194,12 @@ def victory_setup():
     clickable.unregister_all()
     active_text = pytality.buffer.PlainText(
         "The hero is too demoralized to continue fighting. You lose.",
-        y=main.screen_height / 2,
+        y=main.screen_height / 2 + 10,
         center_to=main.screen_width,
-        fg=pytality.colors.LIGHTRED
+        fg=pytality.colors.LIGHTRED,
+        children=[
+            data.load_buffer("grave.ans", width=42, x=(main.screen_width - 42) / 2, y=-15, crop=True)
+        ]
     )
 
 @event.on("victory.draw")
@@ -209,6 +218,12 @@ class Test(unittest.TestCase):
     def test_defeat(self):
         import game
         event.fire("defeat.setup")
+        game.mode = "defeat"
+        game.start()
+
+    def test_moraledefeat(self):
+        import game
+        event.fire("moraledefeat.setup")
         game.mode = "defeat"
         game.start()
 

@@ -353,6 +353,8 @@ class Battle(object):
                 if self.boss_hp <= 0:
                     self.message_log.add("The boss is defeated!")
                     clickable.unregister_all()
+                    hero.active_hero.level_up(self.message_log)
+                    hero.active_hero.level_up(self.message_log)
                     self.boss_hp = 0
                     self.boss_sprite.animate("fade_out", anim_speed=12, restrict=True)
                     self.next_state = "boss_defeated"
