@@ -188,7 +188,7 @@ class Battle(object):
         act = (adventure.World.act - 1)
         self.boss_attack = 15 + (10 * act)
         self.boss_defense = 15 + (10 * act)
-        self.boss_hp = 60 + (20 * act)
+        self.boss_hp = self.boss_max_hp = 60 + (20 * act)
 
         self.hero_sprite = BattleSprite(file_names=[hero.active_hero.get_boss_file()], width=18, height=15, x=10, y=30)
         self.hero_portrait = data.load_buffer("heroportrait.ans", width=16, crop=True)

@@ -76,8 +76,7 @@ class StatDisplay(pytality.buffer.Box):
 
         self.monster_name = pytality.buffer.PlainText("", y=22, fg=pytality.colors.LIGHTGREY, center_to=self.inner_width)
         self.monster_hp_text = pytality.buffer.RichText("", y=23)
-
-        self.battle_header = pytality.buffer.PlainText("BOSS BATTLE", y=10, fg=pytality.colors.LIGHTRED, center_to=self.inner_width, is_invisible=True)
+        self.monster_hp_bar = pytality.buffer.Buffer(width=21, height=1, y=24, x=(self.inner_width / 2 - 10))
 
         self.morale_meter = MoraleMeter(x=2, y=47)
 
@@ -93,7 +92,7 @@ class StatDisplay(pytality.buffer.Box):
             self.hero_equipment_text,
             self.monster_name,
             self.monster_hp_text,
-            self.battle_header,
+            self.monster_hp_bar,
             self.morale_meter
         ])
 
@@ -103,20 +102,20 @@ class StatDisplay(pytality.buffer.Box):
     def set_mode(self, mode):
         self.mode = mode
         if mode == "battle":
-            self.monster_name.is_invisible = True
-            self.monster_hp_text.is_invisible = True
+            self.monster_name.is_invisible = False
+            self.monster_hp_text.is_invisible = False
+            self.monster_hp_bar.is_invisible = False
             self.hero_stat_text.is_invisible = False
-            self.battle_header.is_invisible = False
         elif mode == "dungeon":
             self.monster_name.is_invisible = False
             self.monster_hp_text.is_invisible = False
             self.hero_stat_text.is_invisible = False
-            self.battle_header.is_invisible = True
+            self.monster_hp_bar.is_invisible = True
         else:
             self.monster_name.is_invisible = True
             self.monster_hp_text.is_invisible = True
             self.hero_stat_text.is_invisible = False
-            self.battle_header.is_invisible = True
+            self.monster_hp_bar.is_invisible = True
         self.dirty = True
 
     def tick(self, owner=None):
@@ -195,6 +194,34 @@ class StatDisplay(pytality.buffer.Box):
                 self.monster_hp_text.x = 0
         else:
             battle = owner
+            if battle:
+                start_y = max(25, self.hero_equipment_text.height + self.hero_equipment_text.y + 5)
+                # Boss HP
+                if battle.real_boss:
+                    self.monster_name.set("World-Devourer")
+                else:
+                    self.monster_name.set("Skulltaker")
+
+                self.monster_hp_text.set((" HP <WHITE>%i</> / <WHITE>%i</> " % (battle.boss_hp, battle.boss_max_hp)))
+                self.monster_hp_text.x = (self.inner_width / 2) - (self.monster_hp_text.width / 2)
+
+                self.monster_name.y = start_y
+                self.monster_hp_text.y = start_y + 1
+                self.monster_hp_bar.y = start_y + 2
+
+                green_boxes = int(float(self.monster_hp_bar.width) * battle.boss_hp / battle.boss_max_hp)
+
+                hp_color = "WHITE"
+                if green_boxes <= 10:
+                    hp_color = "YELLOW"
+                if green_boxes <= 5:
+                    hp_color = "LIGHTRED"
+
+                for i in range(0, self.monster_hp_bar.width):
+                    if i < green_boxes:
+                        self.monster_hp_bar.set_at(x=i, y=0, fg=pytality.colors.LIGHTGREEN, bg=pytality.colors.GREEN, char='\xDF')
+                    else:
+                        self.monster_hp_bar.set_at(x=i, y=0, fg=pytality.colors.LIGHTRED, bg=pytality.colors.RED, char='\xDF')
 
         self.morale_meter.tick(self.mode)
 
