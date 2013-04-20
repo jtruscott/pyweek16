@@ -12,20 +12,19 @@ import monsters
 import adventure
 
 exchanges = [
+#This row has exactly 82 characters in it This row has exactly 82 characters in it
     dict(
         hero="""
-Oh Father, I swear, by the fiery blood that courses in
-both of our veins, I will strike down this demonic coward
-who has spilled your sanguine life-force onto this dead earth!""",
+Oh Father, I swear, by the fiery blood that courses in both of our veins, I will
+strike down this demonic coward who has spilled your sanguine life-force onto this
+dead earth!""",
         choices=[
             dict(title="SWING AND SNIPE", text="""
-It does make the ground a rather nice shade of maroon.
-I've got rugs that go well with all kinds of bloodstains.
-Would you care to BROWSE MY CATALOGUE OF DEATH?"""),
+It does make the ground a rather nice shade of maroon. I've got rugs that go well
+with all kinds of bloodstains. Would you care to BROWSE MY CATALOGUE OF DEATH?"""),
             dict(title="VILLAINOUS GLOAT", text="""
-Yes, yes! Your tears <WHITE>feed</> me, cowardly mortal! I can feel
-the hatred saturating your heart! Let it consume you!
-Become your hate, tiny human, and strike me down!
+Yes, yes! Your tears <WHITE>feed</> me, cowardly mortal! I can feel the hatred saturating
+your heart! Let it consume you! Become your hate, tiny human, and strike me down!
 But not too hard, I just had this infernal, soul-forged plate buffed and polished.
 Do you have any idea how many orphan souls it takes to get this sheen?"""),
         ]
@@ -50,8 +49,8 @@ Yeah, go ahead, pick it back up, that's fine. Alright, where were we? """),
     dict(
         hero="""
 Die, monster! Your hellish kind should have been exterminated centuries ago,
-and your foul taint only stains the world with your vile filth!
-My powerful blade will swing true and destroy all that you are, unspeakable fiend!""",
+and your foul taint only stains the world with your vile filth! My mighty blade
+shall swing true and destroy all that you are, unspeakable fiend!""",
         choices=[
             dict(title="SWING AND SNIPE", text="""
 Well, to be fair, I'm not actually a 'fiend', per se. More of a demon. The
@@ -67,6 +66,23 @@ It's hard, being me..."""),
     ),
     dict(
         hero="""
+I will cut you down, creature of the night! The force of a thousand suns will
+drive my blade into your degenerate flesh, disgusting fiend, and their rage will
+burn away your evil from this earth!""",
+        choices=[
+            dict(title="SWING AND SNIPE", text="""
+You know, I saw someone put the math together on that once. Some kind of
+magnifying death ray. It's a lot harder than you think. You'd probably break your
+arm like that. I prefer something more along the lines of 'the amount of pressure
+required to drag a serrated blade through gross anatomy'. Here, like this!"""),
+            dict(title="VILLAINOUS GLOAT", text="""
+I could use a bit of a searing; it helps maintain my diabolical good looks. It's
+no accident I've been Overlord of the Year, three years running. It takes a lot of
+effort to murder that many children, to glower that hatefully, you know?"""),
+        ]
+    ),
+    dict(
+        hero="""
 The heart of this world cries out for your death, the tears of a thousand innocents
 stain your skin, and by my strength and the vengeance that thrums in my soul,
 I will vanquish you!""",
@@ -77,7 +93,7 @@ Kernshebofell that the Tormented Flames of Oshtovenur just don't work for my
 complexion! You've got to maintain your image, you know; do you think all of the
 Mind Crushing Toil would really work out if us Overlords of the Year didn't look
 like we bathed in the blood of virgins every morning! Here, let me give you a
-better look... """),
+better look..."""),
             dict(title="VILLAINOUS GLOAT", text="""
 The heart of the world is kind of a huge, molten rock. I've been down there.
 It's warm. It doesn't really 'cry out' much, unless you count the sound of the
@@ -86,6 +102,47 @@ are coming from. We might have to look into that. Thanks for that! We can always
 use more people willing to put out new ideas and really get their head in the game."""),
         ]
     ),
+    dict(
+        hero="""
+Your evil armies were as nothing before me, cur. I have destroyed your allies, and
+I have burnt your stronghold to the ground! Now, I will finish this, by taking
+your head and ending your evil reign!""",
+        choices=[
+            dict(title="SWING AND SNIPE", text="""
+Oh no, my evil hordes! Whatever will I do? Oh, that's right. Use the secondary
+evil hordes. Or the tertiary. Or the... let's just say I've got a lot of evil
+hordes, okay? They don't exactly take a lot of training or management. Some of
+them even literally grow on trees! That, or I can just kill you myself."""),
+            dict(title="VILLAINOUS GLOAT", text='''
+You know, it's not just a team effort. Every member of our group is ambitious,
+we've all got a lot of strong ideas and a lot of good principals. You can't just
+want the group to succeed, you have to want YOU to succeed, you know? Takes real
+drive and personality, you need to be a real go-getter, the kind of guy who wakes
+up in the morning and says "Self, I'm going to burn an entire city to the ground
+today, and I'm going to do it for me."'''),
+        ]
+    ),
+    dict(
+        hero="""
+You monster! Look at the evil you have wrought! The land is ash before you, and
+the polluted waters run black under a weeping sun! For all the hell you have
+brought to this earth, I will destroy you!""",
+        choices=[
+            dict(title="SWING AND SNIPE", text="""
+Honestly, I'm just getting started. It's going to take months to really despoil
+the world and break open the sky, releasing the shrieking hordes of eternal night.
+That kind of thing takes planning, it takes resources, and it takes the right
+attitude. If you can't say 'no' to slacking, you'll always say 'yes' to lacking."""),
+            dict(title="VILLAINOUS GLOAT", text="""
+I know! I was particularly proud of all the ash. I kept those hellfires stoked for
+days! Our draconic hordes are really dedicated to achieving the most optimal
+results. Fireblood the Soulburner was looking great for a promotion, too! I mean,
+until you lopped off his head. That was depressing. Oh well, thousands more
+blood-crazed, psychotic dragons where he came from, I guess!"""),
+        ]
+    ),
+
+#This row has exactly 82 characters in it This row has exactly 82 characters in it
 ]
 
 
