@@ -65,7 +65,7 @@ class Monster(object):
 
         if not self.started:
             act_bonus = adventure.World.act - 2
-            self.attack += act_bonus * 10
+            self.attack += act_bonus * 15
             self.defense += act_bonus * 10
             self.hp += act_bonus * 20
             self.max_hp += act_bonus * 20
