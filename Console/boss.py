@@ -379,6 +379,7 @@ class Battle(object):
                     event.fire("victory.setup")
                 else:
                     game.mode = "adventure"
+                    hero.active_hero.in_combat = False
                     adventure.active_adventure.start_act()
 
             elif self.next_state == "hero_defeated":
