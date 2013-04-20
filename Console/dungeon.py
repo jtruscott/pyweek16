@@ -140,6 +140,9 @@ Assist the hero's advancement by helpfully sending monsters at him!
 
 Try not to kill him, though - that's very demoralizing. And if he
 runs out of morale completely, he'll give up the heroism business.
+
+            Click anywhere to dismiss this tutorial.
+
 """, x=45, y=33)
 
             make_box(text="""
@@ -154,12 +157,12 @@ stats - If he dies
 he'll lose morale.
 """, x=131, y=15)
             make_box(text="""
-The morale meter
+This morale meter
 will regenerate
 when very low,
 and affects the
 hero's stats.
-""", x=133, y=35)
+""", x=132, y=35)
             make_box(text="""
 This message log
 will help keep
