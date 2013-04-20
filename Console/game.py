@@ -31,7 +31,7 @@ shutdown_event = threading.Event()
 
 mode = "dunsany"
 
-def start():
+def start(nosetup=False):
     log.debug("Starting Game")
 
     global tick_thread
@@ -44,8 +44,9 @@ def start():
     input_thread.daemon = True
     input_thread.start()
 
-    event.fire("setup")
-    event.fire("dunsany.setup")
+    if not nosetup:
+        event.fire("setup")
+        event.fire("dunsany.setup")
     try:
         while True:
             kwargs = action_queue.get()
@@ -61,7 +62,6 @@ def start():
                 pytality.term.move_cursor(**kwargs)
 
             event.fire('%s.%s' % (mode, event_name), **kwargs)
-            event.fire('%s.predraw' % mode)
             event.fire('%s.draw' % mode)
             pytality.term.flip()
 

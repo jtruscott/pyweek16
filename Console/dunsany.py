@@ -2,6 +2,7 @@ import pytality
 import main
 import event
 import data
+import time
 import unittest
 
 class PretentiousPullQuote(object):
@@ -60,9 +61,39 @@ class PretentiousPullQuote(object):
         elif self.i < self.end:
             self.i = self.end
         else:
+            # transition to adventure mode
+            fullscreen_flash = pytality.buffer.Buffer(
+                height=main.screen_height,
+                width=main.screen_width
+            )
+            transition_frames = [
+                [pytality.colors.DARKGREY, pytality.colors.BLACK, '\xDB'],
+                [pytality.colors.DARKGREY, pytality.colors.BLACK, '\xB1'],
+                [pytality.colors.DARKGREY, pytality.colors.BLACK, '\xDB'],
+                [pytality.colors.LIGHTGREY, pytality.colors.DARKGREY, '\xB1'],
+                [pytality.colors.LIGHTGREY, pytality.colors.DARKGREY, '\xDB'],
+                [pytality.colors.WHITE, pytality.colors.LIGHTGREY, '\xB1'],
+                [pytality.colors.WHITE, pytality.colors.LIGHTGREY, '\xDB'],
+            ]
+            for fg, bg, ch in transition_frames:
+                start = time.time()
+
+                for row in fullscreen_flash._data:
+                    for col in row:
+                        col[:] = [fg, bg, ch]
+
+                fullscreen_flash.draw(dirty=True)
+                pytality.term.flip()
+                # do this at about 10fps.
+                delay = 1.0/10
+                time.sleep(min(delay, max(0, time.time() - start + delay)))
+
+            # and now fire adventure mode
             import game
-            event.fire("dungeon.setup")
-            game.mode = "dungeon"
+            import adventure
+            event.fire("adventure.setup")
+            adventure.active_adventure.load_option("burn_1")
+            game.mode = "adventure"
 
         self.tick()
 

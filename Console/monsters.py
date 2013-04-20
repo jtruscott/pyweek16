@@ -5,6 +5,7 @@ import event
 import overlay
 import random
 import logging
+import collections
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ def combat(attack, defense, powerful=False, durable=False):
 
     log.debug("final attack: %r; defense: %r" % (attack, defense))
 
-    return attack / defense
+    return int(attack / defense)
 
 
 class Monster(object):
@@ -52,6 +53,8 @@ class Monster(object):
     attack = 10
     defense = 10
 
+    xp_value = 15
+
     attack_type = 0 #0 for mixed magic/phys, 1 for phys only, 2 for magic only
 
     #log.debug("creating monster with attack type %r" % attack_type)
@@ -67,20 +70,27 @@ class Monster(object):
 
             if 'durable' in self.tags:
                 self.durable = True
+                self.xp_value += 5
             if 'phys' in self.tags:
                 self.powerful = True
+                self.xp_value += 5
             if 'magic' in self.tags:
                 self.m_powerful = True
+                self.xp_value += 5
             if self.powerful and not self.m_powerful:
                 self.attack_type = 1
             elif not self.powerful and self.m_powerful:
                 self.attack_type = 2
             self.attack_current = self.attack_type
 
+
+
             if 'terror' in self.tags:
+                self.xp_value += 5
                 hero.lose_morale(10)
             else:
                 hero.lose_morale(5)
+
 
 
 
@@ -90,16 +100,16 @@ class Monster(object):
             message_log.add("The monster attacks!")
 
             if self.attack_type == 0:
-                self.attack_current = random.randint(1,2)
+                self.attack_current = random.randint(1, 2)
 
             log.debug("this tick, attack type %r" %self.attack_current)
 
             if self.attack_current == 1:
-                log.debug("Phys attack, attack %r, def %r, powerful %r" %(self.attack,hero.defense,self.powerful))
-                damage = combat(self.attack, hero.defense, self.powerful)
+                log.debug("Phys attack, attack %r, def %r, powerful %r" % (self.attack,hero.defense,self.powerful))
+                damage = combat(self.attack, hero.defense * hero.morale_multiplier(), self.powerful)
             elif self.attack_current == 2:
-                log.debug("Mag attack, attack %r, def %r, powerful %r" %(self.attack,hero.m_defense,self.powerful))
-                damage = combat(self.attack, hero.m_defense, self.m_powerful)
+                log.debug("Mag attack, attack %r, def %r, powerful %r" % (self.attack,hero.m_defense,self.powerful))
+                damage = combat(self.attack, hero.m_defense * hero.morale_multiplier(), self.m_powerful)
             else:
                 message_log.add("ERROR: illegal attack type")
 
@@ -118,7 +128,7 @@ class Monster(object):
         elif self.stage == 6:
             monster_sprite.set_at(0, 0, fg=pytality.colors.RED)
             message_log.add("The hero strikes!")
-            damage = combat(hero.attack, self.defense, False, self.durable)
+            damage = combat(hero.attack * hero.morale_multiplier(), self.defense, False, self.durable)
             self.hp -= damage
             if self.hp <= 0:
                 self.hp = 0
@@ -229,7 +239,7 @@ class CardDisplay(pytality.buffer.Box):
     card_delay = 5
     slots = 6
 
-    def __init__(self, dungeon=None, **kwargs):
+    def __init__(self, dungeon=None, monster_type=None, **kwargs):
         super(CardDisplay, self).__init__(
             draw_bottom=False, draw_left=False, draw_right=False, padding_x=0,
             **kwargs
@@ -237,10 +247,29 @@ class CardDisplay(pytality.buffer.Box):
         self.dungeon = dungeon
         self.next_card_in = 0
         self.cards = [None] * self.slots
+        self.monster_type = monster_type
 
         self.title = pytality.buffer.PlainText("[ Available Monsters ]", y=-1, fg=pytality.colors.WHITE)
         self.title.x = (self.inner_width / 2) - (self.title.width / 2)
         self.children.append(self.title)
+
+    def pick_card(self):
+        if self.monster_type == "fire":
+            choices = all_types + [Dragon, Efreet] * 3
+        elif self.monster_type == "crypt":
+            choices = all_types + [Lich, ArmorSpirit] * 3
+        elif self.monster_type == "ogre":
+            choices = all_types + [Ogre, Mimic] * 3
+        else:
+            choices = all_types[:]
+
+        # this isn't elegant, but clogged hands aren't very fun.
+        for card_type, card_type_count in collections.Counter(type(x) for x in self.cards if x).items():
+            if card_type_count >= 3:
+                while card_type in choices:
+                    choices.remove(card_type)
+
+        return random.choice(choices)
 
     def tick(self):
         if self.next_card_in and not self.dungeon.level.active_monster:
@@ -251,7 +280,7 @@ class CardDisplay(pytality.buffer.Box):
 
         if self.next_card_in <= 0 and None in self.cards:
             slot = self.cards.index(None)
-            card_cls = random.choice(all_types)
+            card_cls = self.pick_card()
             log.debug("Creating new card in slot %r, class is %r", slot, card_cls)
             card = card_cls(parent=self, x=(1 + slot * 17), x_offset=self.x + self.padding_x, y_offset=self.y + self.padding_y)
 
@@ -266,6 +295,9 @@ class CardDisplay(pytality.buffer.Box):
 
     def card_clicked(self, card):
         if self.dungeon.level.active_monster:
+            return False
+
+        if not self.dungeon.level.move_path:
             return False
 
         self.dungeon.level.start_battle_with(card)

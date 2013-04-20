@@ -77,7 +77,7 @@ def generate_level(size, **kwargs):
     return Level(rooms, room_list, **kwargs)
 
 class Dungeon(object):
-    def __init__(self):
+    def __init__(self, monster_type):
         sidebar_width = 26
         bottom_height = 17
         self.message_log = message.MessageLog(
@@ -94,6 +94,7 @@ class Dungeon(object):
             y=main.screen_height - bottom_height,
             border_fg=pytality.colors.LIGHTGREY,
             dungeon=self,
+            monster_type=monster_type
         )
         self.level = generate_level(
             10,
@@ -128,9 +129,9 @@ class Dungeon(object):
 active_dungeon = None
 
 @event.on("dungeon.setup")
-def dungeon_setup():
+def dungeon_setup(monster_type=None):
     global active_dungeon
-    active_dungeon = Dungeon()
+    active_dungeon = Dungeon(monster_type=monster_type)
 
 @event.on("dungeon.tick")
 def dungeon_tick():
@@ -143,7 +144,17 @@ def dungeon_draw():
 
 import unittest
 class Test(unittest.TestCase):
-    def test_generate(self):
+    def test_mode(self):
+        import game
+        event.fire("setup")
+        event.fire("dungeon.setup")
+        hero.active_hero.has_sword = True
+        hero.active_hero.has_shield = True
+
+        game.mode = "dungeon"
+        game.start(nosetup=True)
+
+    def skip_test_generate(self):
         level = generate_level(10, width=100, height=60)
         self.assertTrue(level)
 

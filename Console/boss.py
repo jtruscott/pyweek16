@@ -73,7 +73,7 @@ class Battle(object):
             self.boss_sprite = BattleSprite(file_names=["finalboss.ans"], width=61, height=48, x=self.battle_window.width - 61, y=0, crop=True)
         else:
             self.boss_sprite = BattleSprite(file_names=["you2.ans", "you2alt.ans"], width=34, height=31, x=self.battle_window.width - 40, y=14, crop=True)
-        self.hero_sprite = BattleSprite(file_names=["herods.ans"], width=18, height=15, x=10, y=30)
+        self.hero_sprite = BattleSprite(file_names=[hero.active_hero.get_boss_file()], width=18, height=15, x=10, y=30)
 
         self.battle_window.children = [self.boss_sprite, self.hero_sprite]
 

@@ -94,8 +94,9 @@ accumsan malesuada a quis turpis. Vivamus quis est velit. Nam at cursus nibh.
         text_kwargs=dict(x=25, y=25),
         choice_kwargs=dict(y=50),
         choices=[
-            dict(set="next_dungeon", value="crypt", next="end_act", text="Yes!", x=40),
-            dict(set="next_dungeon", value="orcs", next="end_act", text="No!", x=60),
+            dict(set="next_dungeon", value="crypt", next="end_act", text="Crypt!", x=30),
+            dict(set="next_dungeon", value="fire", next="end_act", text="Fire!", x=50),
+            dict(set="next_dungeon", value="ogre", next="end_act", text="Ogres!", x=70),
         ]
     ),
 )
@@ -140,7 +141,7 @@ class Adventure(object):
 
         if choice.next == "end_act":
             import game
-            event.fire("dungeon.setup")
+            event.fire("dungeon.setup", World.next_dungeon)
             game.mode = "dungeon"
         else:
             self.load_option(choice.next)
