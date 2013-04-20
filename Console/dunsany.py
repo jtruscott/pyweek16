@@ -181,6 +181,18 @@ def victory_setup():
         fg=pytality.colors.LIGHTRED
     )
 
+@event.on("moraledefeat.setup")
+def victory_setup():
+    global active_text
+    pytality.term.clear()
+    clickable.unregister_all()
+    active_text = pytality.buffer.PlainText(
+        "The hero is too demoralized to continue fighting. You lose.",
+        y=main.screen_height / 2,
+        center_to=main.screen_width,
+        fg=pytality.colors.LIGHTRED
+    )
+
 @event.on("victory.draw")
 @event.on("defeat.draw")
 def endgame_draw():

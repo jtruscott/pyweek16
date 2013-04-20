@@ -245,11 +245,16 @@ class Battle(object):
             if self.next_state == "hero_talk":
                 if self.pending_attack_type:
                     self.pending_attack_type = None
-                    self.message_log.add("The boss strikes!")
                     if self.pending_attack_type == "phys":
-                        hero.active_hero.hp -= monsters.combat(self.boss_attack, hero.active_hero.defense * hero.active_hero.morale_multiplier(), powerful=self.pending_attack_powerful, durable=False)
+                        self.message_log.add("The boss strikes!")
+                        damage = monsters.combat(self.boss_attack, hero.active_hero.defense * hero.active_hero.morale_multiplier(), powerful=self.pending_attack_powerful, durable=False)
+                        self.message_log.add("%s damage!" % damage)
+                        hero.active_hero.hp -= damage
                     else:
-                        hero.active_hero.hp -= monsters.combat(self.boss_attack, hero.active_hero.m_defense * hero.active_hero.morale_multiplier(), powerful=self.pending_attack_powerful, durable=False)
+                        self.message_log.add("The boss uses magic!")
+                        damage= monsters.combat(self.boss_attack, hero.active_hero.m_defense * hero.active_hero.morale_multiplier(), powerful=self.pending_attack_powerful, durable=False)
+                        self.message_log.add("%s damage!" % damage)
+                        hero.active_hero.hp -= damage
 
                     if hero.active_hero.hp <= 0:
                         self.message_log.add("The hero is defeated!")
@@ -258,6 +263,10 @@ class Battle(object):
                         self.hero_sprite.animate("fade_out", anim_speed=3, restrict=True)
                         self.next_state = "hero_defeated"
                         self.state_delay = len(self.hero_sprite.overlay.empty_cells) / 3 + 5
+
+                    elif self.real_boss:
+                        message_log.add("Hero is terrified!")
+                        hero.lose_morale(3)
 
                     else:
                         hero.active_hero.morale += 3
@@ -283,7 +292,9 @@ class Battle(object):
 
             elif self.next_state == "boss_choose":
                 self.message_log.add("The hero strikes!")
-                self.boss_hp -= monsters.combat(hero.active_hero.attack * hero.active_hero.morale_multiplier(), self.boss_defense, powerful=False, durable=False)
+                damage = monsters.combat(hero.active_hero.attack * hero.active_hero.morale_multiplier(), self.boss_defense, powerful=False, durable=False)
+                self.message_log.add("%s damage!" % damage)
+                self.boss_hp -= damage
                 if self.boss_hp <= 0:
                     self.message_log.add("The boss is defeated!")
                     clickable.unregister_all()
@@ -493,7 +504,8 @@ def boss_setup(dungeon):
     if adventure.World.finding == "armor":
         dungeon.message_log.add("Hero found: \n<WHITE>\x07</> <BROWN>Armor Of The Ages</>")
         hero.active_hero.has_armor = True
-        hero.active_hero.gain_stat('m_defense', 10, dungeon.message_log)
+        hero.active_hero.gain_stat('defense', 5, dungeon.message_log)
+        hero.active_hero.gain_stat('m_defense', 5, dungeon.message_log)
 
     adventure.World.finding = None
 

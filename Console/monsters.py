@@ -50,10 +50,10 @@ class Monster(object):
     durable = False
 
     hp = max_hp = 40
-    attack = 5
+    attack = 10
     defense = 10
 
-    xp_value = 15
+    xp_value = 25
 
     attack_type = 0 #0 for mixed magic/phys, 1 for phys only, 2 for magic only
 
@@ -74,29 +74,28 @@ class Monster(object):
 
             if 'durable' in self.tags:
                 self.durable = True
-                self.xp_value += 5
+
             if 'phys' in self.tags:
                 self.powerful = True
-                self.xp_value += 5
+
             if 'magic' in self.tags:
                 self.m_powerful = True
-                self.xp_value += 5
+
             if self.powerful and not self.m_powerful:
                 self.attack_type = 1
             elif not self.powerful and self.m_powerful:
                 self.attack_type = 2
             self.attack_current = self.attack_type
 
-
-
             if 'terror' in self.tags:
                 self.xp_value += 5
-                hero.lose_morale(6)
-            else:
-                hero.lose_morale(3)
+                message_log.add("Hero is terrified!")
+                hero.lose_morale(5)
+            message_log.add("Hero loses morale!")
+            hero.lose_morale(5)
 
-
-
+            if 'loot' in self.tags:
+                self.xp_value -= 5
 
         #print self.hp, self.stage
         if self.stage == 0:

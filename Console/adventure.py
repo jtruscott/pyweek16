@@ -120,21 +120,21 @@ options = dict(
 
 
 
-                    You could kidnap his girlfriend and run away to the Fire Temple.
+                    You could kidnap his girlfriend and run away to the Fire Dungeon.
                     I bet Altrune wouldn't like that at all, and would hunt you down for it.
                     Heroes love rescuing a damsel in distress, after all.
 
 
 
                     Or you could kill his father and steal the priceless family shield.
-                    You could let him know that you're keeping the shield in the Ogre
-                    Stronghold. Altrune would probably want that shield so bad he'd trudge
+                    You could let him know that you're keeping the shield in the Citadel
+                    of the Ogres. Altrune would probably want that shield so bad he'd trudge
                     through an entire den of angry ogres, just to get it back.
 
 
 
                     Or maybe you'd rather just kill everyone that he knows and loves,
-                    and then raise them as zombies in your Evil Crypt Lair.
+                    and then raise them as zombies in your Unholy Crypt.
                     I'm sure that'd make Altrune pretty angry.
 
 
@@ -147,9 +147,9 @@ options = dict(
         text_kwargs=dict(x=10, y=12, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE),
         choice_kwargs=dict(y=51, height=7),
         choices=[
-            dict(set="next_dungeon", value="fire", next="end_act1", text="Kidnap his girlfriend\n        at the\n      Fire Temple!", x=25, morale_bonus=70),
-            dict(set="next_dungeon", value="ogre", next="end_act1", text="  Steal the shield   \n    and store it\n   with the Ogres!", x=55, morale_bonus=50),
-            dict(set="next_dungeon", value="crypt", next="end_act1", text="    Kill everyone\n and raise zombies \n    in the Crypt!", x=85, morale_bonus=60),
+            dict(set="next_dungeon", value="fire", next="end_act1", text="Kidnap his girlfriend\n   and take her to   \n  the Fire Dungeon!  ", x=25, morale_bonus=70),
+            dict(set="next_dungeon", value="ogre", next="end_act1", text="  Steal that shield  \n   and store it in   \n  the Ogre Citadel!  ", x=55, morale_bonus=50),
+            dict(set="next_dungeon", value="crypt", next="end_act1", text="  Kill everyone and  \n raise the dead from \n  the Unholy Crypt!  ", x=85, morale_bonus=60),
         ]
     ),
     fetch_1=Option(
@@ -194,7 +194,7 @@ options = dict(
         choice_kwargs=dict(y=51, height=6),
         choices=[
             dict(set="next_dungeon", value="fire", next="end_act2", text=" Get the Sword Of The Ages \nfrom the Eldritch Dragons", x=30, morale_bonus=80),
-            dict(set="next_dungeon", value="crypt", next="end_act2", text=" Get the Armor Of The Ages \n  from the Haunted Tomb", x=70, morale_bonus=80),
+            dict(set="next_dungeon", value="crypt", next="end_act2", text=" Get the Armor Of The Ages \n  from the Haunted Tomb  ", x=70, morale_bonus=80),
         ]
     ),
     final_1=Option(

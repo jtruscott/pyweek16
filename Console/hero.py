@@ -372,6 +372,9 @@ class Hero(object):
         if self.morale <= 0:
             self.morale = 0
             self.defeated = True
+            import game
+            game.mode = "defeat"
+            event.fire("moraledefeat.setup")
 
     def gain_hp(self, amount):
         self.hp = min(self.max_hp, self.hp + amount)
