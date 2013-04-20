@@ -249,7 +249,7 @@ class Shoggoth(MonsterCard):
 all_types = MonsterCard.__subclasses__()
 
 class CardDisplay(pytality.buffer.Box):
-    card_delay = 5
+    card_delay = 20
     slots = 6
 
     def __init__(self, dungeon=None, monster_type=None, **kwargs):
