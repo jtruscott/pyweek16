@@ -243,9 +243,9 @@ class Battle(object):
             sound.play_music("OHC_Changeling_Rumble.mp3")
 
         act = (adventure.World.act - 1)
-        self.boss_attack = 4 + (7 * act)
+        self.boss_attack = 6 + (7 * act)
         self.boss_defense = 4 + (7 * act)
-        self.boss_hp = self.boss_max_hp = 45 + (20 * act)
+        self.boss_hp = self.boss_max_hp = 50 + (20 * act)
 
         self.hero_sprite = BattleSprite(file_names=[hero.active_hero.get_boss_file()], width=18, height=15, x=10, y=30)
         self.hero_portrait = data.load_buffer("heroportrait.ans", width=16, crop=True)
@@ -551,8 +551,8 @@ def boss_setup(dungeon):
     if adventure.World.finding == "shield":
         dungeon.message_log.add("Hero found: \n<WHITE>\x07</> <BROWN>Family Shield</>")
         hero.active_hero.has_shield = True
-        hero.active_hero.gain_stat('defense', 10, dungeon.message_log)
-        hero.active_hero.gain_stat('m_defense', 10, dungeon.message_log)
+        hero.active_hero.gain_stat('defense', 5, dungeon.message_log)
+        hero.active_hero.gain_stat('m_defense', 5, dungeon.message_log)
 
     if adventure.World.finding == "sword":
         dungeon.message_log.add("Hero found: \n<WHITE>\x07</> <BROWN>Sword Of The Ages</>")
@@ -562,8 +562,8 @@ def boss_setup(dungeon):
     if adventure.World.finding == "armor":
         dungeon.message_log.add("Hero found: \n<WHITE>\x07</> <BROWN>Armor Of The Ages</>")
         hero.active_hero.has_armor = True
-        hero.active_hero.gain_stat('defense', 5, dungeon.message_log)
-        hero.active_hero.gain_stat('m_defense', 5, dungeon.message_log)
+        hero.active_hero.gain_stat('defense', 10, dungeon.message_log)
+        hero.active_hero.gain_stat('m_defense', 10, dungeon.message_log)
 
     adventure.World.finding = None
 
