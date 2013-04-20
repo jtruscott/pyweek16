@@ -209,10 +209,12 @@ class Level(pytality.buffer.Buffer):
             if hero.active_hero.defeated:
                 hero.active_hero.defeated = False
                 self.active_monster = None
+                hero.active_hero.in_combat = False
                 self.monster_sprite.is_invisible = True
 
                 hero.active_hero.morale -= 10
                 if hero.active_hero.morale > 0:
+                    self.hero_sprite.set_at(0, 0, fg=pytality.colors.WHITE)
                     dungeon.message_log.add("<LIGHTMAGENTA>Hero loses morale!")
                     dungeon.message_log.add("The hero rises again...")
                     hero.active_hero.hp = hero.active_hero.max_hp / 2

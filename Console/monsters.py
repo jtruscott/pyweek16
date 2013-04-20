@@ -6,6 +6,7 @@ import overlay
 import random
 import logging
 import collections
+import adventure
 
 log = logging.getLogger(__name__)
 
@@ -50,8 +51,8 @@ class Monster(object):
     durable = False
 
     hp = max_hp = 40
-    attack = 10
-    defense = 10
+    attack = 9
+    defense = 9
 
     xp_value = 25
 
@@ -63,6 +64,12 @@ class Monster(object):
         message_log = dungeon.message_log
 
         if not self.started:
+            act_bonus = adventure.World.act - 2
+            self.attack += act_bonus * 10
+            self.defense += act_bonus * 10
+            self.hp += act_bonus * 20
+            self.max_hp += act_bonus * 20
+
             self.started = True
             log.debug("Start: hero morale %r, mod %r" % (hero.morale, hero.morale_multiplier()))
             message_log.add("")

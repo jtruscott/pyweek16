@@ -18,12 +18,33 @@ class MoraleMeter(pytality.buffer.Buffer):
         ]
         self.children = [self.title, self.meter] + self.text_lines
         self.last_value = None
+        self.i = 0
 
     def tick(self, mode):
+        self.i += 1
+
+        if active_hero.morale < 40:
+            if self.i % 15 == 7:
+                self.title.fg = pytality.colors.LIGHTRED
+                self.title.update_data()
+                self.dirty = True
+
+            if self.i % 15 == 0:
+                if active_hero.morale < 26:
+                    self.title.fg = pytality.colors.RED
+                else:
+                    self.title.fg = pytality.colors.LIGHTGREY
+                self.title.update_data()
+                self.dirty = True
+
         if (active_hero.morale, active_hero.max_morale, mode) == self.last_value:
             return
 
         self.last_value = (active_hero.morale, active_hero.max_morale, mode)
+
+        if active_hero.morale >= 40:
+            self.title.fg = pytality.colors.WHITE
+            self.title.update_data()
 
         filled_rows = int(15.0 * active_hero.morale / active_hero.max_morale)
         for i, line in enumerate(self.text_lines):
@@ -55,7 +76,7 @@ class MoraleMeter(pytality.buffer.Buffer):
                             self.meter._data[y][x] = [fg, pytality.colors.BLUE, ch]
                     else:
                         self.meter._data[y][x] = [fg, bg, '\xDB']
-        self.meter.dirty = True
+        self.dirty = True
 
 class StatDisplay(pytality.buffer.Box):
     def __init__(self, **kwargs):
@@ -411,6 +432,9 @@ class Hero(object):
             if self.next_regen <= 0:
                 self.next_regen = self.regen_delay
                 self.gain_hp(self.regen_amount)
+
+                if self.morale < 40:
+                    self.morale += 1
 
 @event.on('setup')
 def on_setup():

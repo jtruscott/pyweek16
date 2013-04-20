@@ -243,7 +243,7 @@ class Battle(object):
             sound.play_music("OHC_Changeling_Rumble.mp3")
 
         act = (adventure.World.act - 1)
-        self.boss_attack = 13 + (10 * act)
+        self.boss_attack = 3 + (20 * act)
         self.boss_defense = 10 + (10 * act)
         self.boss_hp = self.boss_max_hp = 60 + (20 * act)
 
