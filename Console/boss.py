@@ -65,7 +65,7 @@ It's hard, being me..."""),
     ),
     dict(
         hero="""
-he heart of this world cries out for your death, the tears of a thousand innocents
+The heart of this world cries out for your death, the tears of a thousand innocents
 stain your skin, and by my strength and the vengeance that thrums in my soul,
 I will vanquish you!""",
         choices=[

@@ -27,7 +27,7 @@ class Option(object):
         self.timeout = timeout
 
 class Choice(clickable.ClickableBox):
-    def __init__(self, adventure=None, text="", height=5, set=None, value=None, next=None, **kwargs):
+    def __init__(self, adventure=None, text="", height=5, set=None, value=None, next=None, morale_bonus=0, **kwargs):
         self.adventure = adventure
         self.inner_text = pytality.buffer.RichText(
             text,
@@ -38,6 +38,7 @@ class Choice(clickable.ClickableBox):
         self.set = set
         self.value = value
         self.next = next
+        self.morale_bonus = morale_bonus
 
         children = [self.inner_text]
         if 'children' in kwargs:
@@ -73,49 +74,164 @@ class Choice(clickable.ClickableBox):
 options = dict(
     burn_1=Option(
         text="""
-                    <RED>SKULLTAKER:</>
+\n\n\n\n\n\n\n\n\n\n\n\n
+                    You are Skulltaker, a sinister villain if there ever was one.
 
-                    So, brief recap of the project we've got set up. This is Idylburg.
-                    Small town, high happiness rates, low property tax. Horrible place.
-                    Our Department of Prophecy and Malfeasance has picked out a young man
-                    here, born under the exact right signs and portents, who will be the CO
-                    of this age.
+                    You want to take over the world and rule it with an iron evil fist,
+                    but there's just one problem. According to the legends, an ancient
+                    cosmic evil will soon awaken and destroy the world that you intend to
+                    rule.
 
-                    I'm thrilled to be working together with such a talented, driven group
-                    of individuals on this, I have to say. I really feel like we've got the
-                    ambition and the initiative to really take this project places. I think,
-                    given a few moments to appraise this situation, you'll pick out our target
-                    pretty easily.
-
+                    That won't do at all. But the legends also tell of a great and powerful
+                    hero, who will rise from humble beginnings to save the world from
+                    destruction at the hands of evil. And you know just who the prophecy
+                    says is going to be that hero.
 
 
+\n\n\n\n\n\n\n\n\n\n\n\n
+                    This is Altrune. And he doesn't have what it takes to save the world.
 
-
-                    <GREEN>HERO:</>
-
-                    I can not explain it, my love! I can feel a wind curling in my soul,
-                    and that wind... is Destiny!
+                    So you're going to train him to greatness, so he can save it for you.
+                    And after that all that's over, well, you can deal with him then.
 """,
-        text_kwargs=dict(y=15, x=15, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE, children=[
-            data.load_buffer("youport-white.ans", width=18, max_height=12, crop=True, y=1),
-            data.load_buffer("heroportrait-white.ans", width=18, max_height=12, crop=True, y=19)
+        text_kwargs=dict(y=7, x=15, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE, children=[
+            data.load_buffer("youport-white.ans", width=18, max_height=12, crop=True, x=45, y=0),
+            data.load_buffer("heroportrait-white.ans", width=18, max_height=12, crop=True, x=45, y=26)
         ]),
         choice_kwargs=dict(
-            y=50
+            y=53
         ),
         choices=[
-            dict(set="killed_father", value=True, next="burn_2", text="Kill His Father!", x=35),
-            dict(set="killed_father", value=False, next="burn_2", text="Maim His Father!", x=65),
+            dict(next="burn_2", text="   OK   ", x=63, y=53),
         ]
     ),
     burn_2=Option(
-        text="<YELLOW>Kill Everybody!",
-        text_kwargs=dict(x=25, y=25),
-        choice_kwargs=dict(y=50),
+        text="""
+                    Let's start by giving Altrune something to be heroic about.
+
+                    Hero types always get <RED>SO MAD</> when you burn down their villages.
+                    And his hometown of Idylburg is looking very flammable today.
+
+                    So we'll take a torch to his little hometown... And look here!
+                    Altrune's father is home! And so is the love of Altrune's life!
+
+
+
+                    You could kidnap his girlfriend and run away to the Fire Temple.
+                    I bet Altrune wouldn't like that at all, and would hunt you down for it.
+                    Heroes love rescuing a damsel in distress, after all.
+
+
+
+                    Or you could kill his father and steal the priceless family shield.
+                    You could let him know that you're keeping the shield in the Ogre
+                    Stronghold. Altrune would probably want that shield so bad he'd trudge
+                    through an entire den of angry ogres, just to get it back.
+
+
+
+                    Or maybe you'd rather just kill everyone that he knows and loves,
+                    and then raise them as zombies in your Evil Crypt Lair.
+                    I'm sure that'd make Altrune pretty angry.
+
+
+
+                    You don't have enough time to do more than one of those, though.
+
+                    Decisions, decisions.
+
+""",
+        text_kwargs=dict(x=10, y=12, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE),
+        choice_kwargs=dict(y=51, height=7),
         choices=[
-            dict(set="next_dungeon", value="crypt", next="end_act", text="Crypt!", x=30),
-            dict(set="next_dungeon", value="fire", next="end_act", text="Fire!", x=50),
-            dict(set="next_dungeon", value="ogre", next="end_act", text="Ogres!", x=70),
+            dict(set="next_dungeon", value="fire", next="end_act", text="Kidnap his girlfriend\n        at the\n      Fire Temple!", x=25, morale_bonus=70),
+            dict(set="next_dungeon", value="ogre", next="end_act", text="  Steal the shield   \n    and store it\n   with the Ogres!", x=55, morale_bonus=50),
+            dict(set="next_dungeon", value="crypt", next="end_act", text="    Kill everyone\n and raise zombies \n    in the Crypt!", x=85, morale_bonus=60),
+        ]
+    ),
+    fetch_1=Option(
+        text="""
+                    That went pretty well. It looks like Altrune is a fast learner!
+
+
+
+                    But his equipment is still pretty shabby. You're trying to set
+                    him up to stop an ancient, world-devouring cosmic force, and a
+                    puny sword and some armor that probably came from the thrift
+                    store isn't really going to cut it.
+
+
+
+                    You know of a couple artifacts that should be pretty powerful in
+                    the hands of a hero backed by that much prophecy. You can't just
+                    walk up and GIVE them to Altrune, of course, that wouldn't be very
+                    sporting. But he's a straightforward fellow, just drop a couple
+                    hints and he'll go charging off to find the mystical equipment.
+
+
+
+                    You could send him to the Eldritch Dragons in the Fire-Lorne Peaks,
+                    where they keep the legendary <BROWN>Sword Of The Ages</>. If Altrune got that
+                    sword, it would give him a respectable boost in offensive might.
+                    It would probably look snazzy too, crackling with arcane power.
+
+
+
+                    Or maybe you should start Altrune off with the <BROWN>Armor Of the Ages</>,
+                    which is being kept in the Haunted Tomb under the Pellentian Ocean.
+                    That armor would give him a significant increase in his defensive
+                    staying power. More importantly, you've heard it looks pretty cool.
+
+
+
+                    What piece of equipment will you lead Altrune into acquiring?
+
+""",
+        text_kwargs=dict(x=10, y=12, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE),
+        choice_kwargs=dict(y=51, height=6),
+        choices=[
+            dict(set="next_dungeon", value="fire", next="end_act", text=" Get the Sword Of The Ages \nfrom the Eldritch Dragons", x=30, morale_bonus=80),
+            dict(set="next_dungeon", value="crypt", next="end_act", text=" Get the Armor Of The Ages \n  from the Haunted Tomb", x=70, morale_bonus=80),
+        ]
+    ),
+    final_1=Option(
+        text="""
+                    Excellent! Now we just have to lead Altrune to the other artifact,
+                    and he'll be decked out and ready for when the ancient evil awakens.
+
+
+\n\n\n\n\n\n\n\n\n\n\n\n
+
+                                  <MAGENTA>GRLARLBLRLLBLLLABLRLALBLABLBLAALBLABLLBLAL</>
+
+
+
+                    Oh. Oh dear.
+
+
+                    That wasn't supposed to happen yet.
+
+
+                    Well, it looks like there's no time for artifacts. The World-Devourer
+                    is waking up early, and the only person that can stop it is Altrune.
+
+
+                    And Altrune doesn't exactly know about the World-Devourer yet.
+
+
+                    Well, I suppose you ought to lead Altrune right at you, right now,
+                    so those two powerhouses can get to know each other better.
+
+
+                    Let's hope this works!
+
+""",
+        text_kwargs=dict(x=10, y=9, initial_color=pytality.colors.BLACK, bg=pytality.colors.WHITE, children=[
+            data.load_buffer("finalbossport-white.ans", width=18, max_height=12, crop=True, x=45, y=5),
+        ]),
+        choice_kwargs=dict(y=53, height=5),
+        choices=[
+            dict(set="next_dungeon", value=None, next="end_act", text="   OK   ", x=63, y=53, morale_bonus=50),
         ]
     ),
 )
@@ -158,6 +274,11 @@ class Adventure(object):
         if choice.set:
             setattr(World, choice.set, choice.value)
 
+        if choice.morale_bonus:
+            hero.active_hero.morale += choice.morale_bonus
+            if hero.active_hero.morale > 100:
+                hero.active_hero.morale = 100
+
         if choice.next == "end_act":
             import game
             event.fire("dungeon.setup", World.next_dungeon)
@@ -199,7 +320,7 @@ class Test(unittest.TestCase):
         import game
         event.fire("setup")
         event.fire("adventure.setup")
-        active_adventure.load_option("burn_1")
+        active_adventure.load_option("final_1")
 
         game.mode = "adventure"
         game.start()

@@ -87,6 +87,7 @@ class Dungeon(object):
             draw_left=False, border_fg=pytality.colors.LIGHTGREY,
         )
         self.stat_display = hero.stat_display
+        self.stat_display.set_mode("dungeon")
 
         self.card_display = monsters.CardDisplay(
             width=main.screen_width - sidebar_width * 2,
