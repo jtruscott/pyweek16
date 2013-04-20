@@ -163,19 +163,19 @@ class StatDisplay(pytality.buffer.Box):
         # Hero Equipment
         equipment_lines = ["<BROWN>%s</>\n" % "Hero Equipment".center(self.inner_width)]
         if active_hero.has_sword:
-            equipment_lines.append(" <LIGHTGREY>Weapon:</>")
-            equipment_lines.append("  <BROWN>\x07</> <YELLOW>Sword Of The Ages</>")
+            #equipment_lines.append(" <LIGHTGREY>Weapon:</>")
+            equipment_lines.append(" <BROWN>\x07</> <YELLOW>Sword Of The Ages</>")
         if active_hero.has_shield:
-            equipment_lines.append(" <LIGHTGREY>Shield:</>")
-            equipment_lines.append("  <BROWN>\x07 Family Shield</>")
+            #equipment_lines.append(" <LIGHTGREY>Shield:</>")
+            equipment_lines.append(" <BROWN>\x07 Family Shield</>")
         if active_hero.has_armor:
-            equipment_lines.append(" <LIGHTGREY>Armor:</>")
-            equipment_lines.append("  <BROWN>\x07</> <YELLOW>Armor Of The Ages</>")
+            #equipment_lines.append(" <LIGHTGREY>Armor:</>")
+            equipment_lines.append(" <BROWN>\x07</> <YELLOW>Armor Of The Ages</>")
 
         for equipment_key in active_hero.equipment_slots:
             if equipment_key in active_hero.equipment:
-                equipment_lines.append(" <LIGHTGREY>%s:</>" % equipment_key)
-                equipment_lines.append("  <BROWN>\x07 %s</>" % active_hero.equipment[equipment_key])
+                #equipment_lines.append(" <LIGHTGREY>%s:</>" % equipment_key)
+                equipment_lines.append(" <BROWN>\x07 %s</>" % active_hero.equipment[equipment_key])
         self.hero_equipment_text.set("\n".join(equipment_lines))
 
         # Dungeon Stuff
@@ -226,10 +226,30 @@ class Hero(object):
         self.m_defense = 10
 
         self.equipment_slots = [
-            'Amulet',
-            'Arms',
             'Ring',
-            'Boots'
+            'Amulet',
+            'Periapt',
+            'Torc',
+            'Gorget',
+            'Hauberk',
+            'Faulds',
+            'Gauntlets',
+            'Bracers',
+            'Armbands',
+            'Pauldrons',
+            'Besagues',
+            'Vambraces',
+            'Tassets',
+            'Sabatons',
+            'Greaves',
+            'Chasuble',
+            'Surcoat',
+            'Cloak',
+            'Cape',
+            'Robes',
+            'Gloves',
+            'Headband',
+            'Goggles'
         ]
         self.equipment = {}
 
@@ -266,8 +286,39 @@ class Hero(object):
         return 0.9
 
     def make_item(self, power, message_log):
+        enchantments = [
+            #123456789
+            'Power',
+            'Toughness',
+            'Swiftness',
+            'Puissance',
+            'Repelling',
+            'Quickness',
+            'Dexterity',
+            'Charisma',
+            'Wisdom',
+            'Elvenkind',
+            'Archery',
+            'Flight',
+            'Shielding',
+            'Valhalla',
+            'Fireballs',
+            'Eyes',
+            'Accuracy',
+            'Alacrity',
+            'Fortune',
+            'The Fox',
+            'Haste',
+            'Health',
+            'The Ox',
+            'The Tiger',
+            'The Otter',
+            'The Boar'
+            #123456789
+        ]
         slot = random.choice(self.equipment_slots)
-        name = "%s of awesome" % slot
+        enchantment = random.choice(enchantments)
+        name = "%s of %s" % (slot, enchantment)
         self.equipment[slot] = name
         effect = random.choice(['attack', 'defense', 'm_defense'])
         setattr(self, effect, getattr(self, effect) + power)
