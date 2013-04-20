@@ -97,7 +97,6 @@ class Monster(object):
         #print self.hp, self.stage
         if self.stage == 0:
             hero_sprite.set_at(0, 0, fg=pytality.colors.DARKGREY)
-            message_log.add("The monster attacks!")
 
             if self.attack_type == 0:
                 self.attack_current = random.randint(1, 2)
@@ -106,13 +105,17 @@ class Monster(object):
 
             if self.attack_current == 1:
                 log.debug("Phys attack, attack %r, def %r, powerful %r" % (self.attack,hero.defense,self.powerful))
+                message_log.add("The monster attacks!")
                 damage = combat(self.attack, hero.defense * hero.morale_multiplier(), self.powerful)
+
             elif self.attack_current == 2:
                 log.debug("Mag attack, attack %r, def %r, powerful %r" % (self.attack,hero.m_defense,self.powerful))
+                message_log.add("The monster uses magic!")
                 damage = combat(self.attack, hero.m_defense * hero.morale_multiplier(), self.m_powerful)
             else:
                 message_log.add("ERROR: illegal attack type")
 
+            message_log.add("%s damage!" % damage)
             hero.hp -= damage
             if hero.hp <= 0:
                 hero.hp = hero.max_hp
@@ -129,6 +132,7 @@ class Monster(object):
             monster_sprite.set_at(0, 0, fg=pytality.colors.RED)
             message_log.add("The hero strikes!")
             damage = combat(hero.attack * hero.morale_multiplier(), self.defense, False, self.durable)
+            message_log.add("%s damage!" % damage)
             self.hp -= damage
             if self.hp <= 0:
                 self.hp = 0
