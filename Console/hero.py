@@ -240,7 +240,7 @@ class Hero(object):
         self.hp = self.max_hp = 100
         self.next_regen = 0
 
-        self.morale = 7 # Every 20 after this puts you in a new bracket
+        self.morale = 27 # Every 20 after this puts you in a new bracket
                         # so if choice 1 gives 40 morale, that puts hero in bracket 3
         self.max_morale = 100
 
