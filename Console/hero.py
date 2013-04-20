@@ -187,7 +187,7 @@ class StatDisplay(pytality.buffer.Box):
             equipment_lines.append(" <BROWN>\x07</> <YELLOW>Sword Of The Ages</>")
         if active_hero.has_shield:
             #equipment_lines.append(" <LIGHTGREY>Shield:</>")
-            equipment_lines.append(" <BROWN>\x07 Family Shield</>")
+            equipment_lines.append(" <BROWN>\x07</> <YELLOW>Family Shield</>")
         if active_hero.has_armor:
             #equipment_lines.append(" <LIGHTGREY>Armor:</>")
             equipment_lines.append(" <BROWN>\x07</> <YELLOW>Armor Of The Ages</>")
