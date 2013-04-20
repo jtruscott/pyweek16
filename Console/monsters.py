@@ -20,8 +20,8 @@ effect_text = dict(
 def combat(attack, defense, powerful=False, durable=False):
     attack_coeff = 10
     defense_coeff = 1
-    powerful_coeff = 5
-    durable_coeff = 1
+    powerful_coeff = 2
+    durable_coeff = 0.25
 
     if powerful:
         attack_coeff += powerful_coeff
@@ -29,12 +29,12 @@ def combat(attack, defense, powerful=False, durable=False):
     if durable:
         defense_coeff += durable_coeff
 
-    log.debug("starting values: attack %r defense %r attack coeff %r def coeff %r" % (attack, defense, attack_coeff, defense_coeff))
+    #log.debug("starting values: attack %r defense %r attack coeff %r def coeff %r" % (attack, defense, attack_coeff, defense_coeff))
 
     attack = attack * attack_coeff
     defense = defense * defense_coeff
 
-    log.debug("final attack: %r; defense: %r" % (attack, defense))
+    #log.debug("final attack: %r; defense: %r" % (attack, defense))
 
     return int(attack / defense)
 
@@ -50,7 +50,7 @@ class Monster(object):
     durable = False
 
     hp = max_hp = 40
-    attack = 10
+    attack = 5
     defense = 10
 
     xp_value = 15
@@ -66,6 +66,9 @@ class Monster(object):
             self.started = True
             message_log.add("")
             message_log.add("<WHITE>%s</> appears!" % self.name)
+            log.debug("")
+            log.debug("COMBAT: %s with %r HP" % (self.name, self.max_hp))
+            log.debug("COMBAT: Hero has %r HP" % hero.hp)
             hero.in_combat = True
 
             if 'durable' in self.tags:
@@ -101,22 +104,24 @@ class Monster(object):
             if self.attack_type == 0:
                 self.attack_current = random.randint(1, 2)
 
-            log.debug("this tick, attack type %r" %self.attack_current)
+            #log.debug("this tick, attack type %r" %self.attack_current)
 
             if self.attack_current == 1:
-                log.debug("Phys attack, attack %r, def %r, powerful %r" % (self.attack,hero.defense,self.powerful))
+                #log.debug("Phys attack, attack %r, def %r, powerful %r" % (self.attack,hero.defense,self.powerful))
                 message_log.add("The monster attacks!")
                 damage = combat(self.attack, hero.defense * hero.morale_multiplier(), self.powerful)
-
+                log.debug("COMBAT: Monster phys attack %r, hero defense %r, morale mod %r, damage %r" % (self.attack, hero.defense, hero.morale_multiplier(), damage))
             elif self.attack_current == 2:
-                log.debug("Mag attack, attack %r, def %r, powerful %r" % (self.attack,hero.m_defense,self.powerful))
+                #log.debug("Mag attack, attack %r, def %r, powerful %r" % (self.attack,hero.m_defense,self.powerful))
                 message_log.add("The monster uses magic!")
                 damage = combat(self.attack, hero.m_defense * hero.morale_multiplier(), self.m_powerful)
+                log.debug("COMBAT: Monster mag attack %r, hero defense %r, morale mod %r,  damage %r" % (self.attack, hero.m_defense, hero.morale_multiplier(), damage))
             else:
-                message_log.add("ERROR: illegal attack type")
+                log.debug("ERROR: illegal attack type")
 
             message_log.add("%s damage!" % damage)
             hero.hp -= damage
+            log.debug("COMBAT: hero at %r of %r HP" % (hero.hp, hero.max_hp))
             if hero.hp <= 0:
                 hero.hp = hero.max_hp
                 message_log.add("<LIGHTRED>Hero was defeated!")
@@ -132,12 +137,16 @@ class Monster(object):
             monster_sprite.set_at(0, 0, fg=pytality.colors.RED)
             message_log.add("The hero strikes!")
             damage = combat(hero.attack * hero.morale_multiplier(), self.defense, False, self.durable)
+            log.debug("COMBAT: Hero attack %r, hero defense %r, morale mod %r,  damage %r" % (hero.attack, self.defense, hero.morale_multiplier(), damage))
             message_log.add("%s damage!" % damage)
             self.hp -= damage
+            log.debug("COMBAT: monster at %r of %r HP" % (self.hp, self.max_hp))
             if self.hp <= 0:
                 self.hp = 0
                 monster_sprite.set_at(0, 0, fg=pytality.colors.LIGHTRED)
                 message_log.add("<WHITE>%s</> is defeated!" % self.name)
+                log.debug("COMBAT: Monster Defeated")
+                log.debug("")
                 hero.end_combat(self, dungeon)
                 self.defeated = True
 
