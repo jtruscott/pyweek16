@@ -1,1 +1,11 @@
-Licence: short_licence
+Licence: BSD.
+
+All music is from Patashu
+https://soundcloud.com/patashu
+Used under the Creative Commons license.
+
+Tracks Used:
+https://soundcloud.com/patashu/one-hour-contest-changeling
+https://soundcloud.com/patashu/the-final-threat
+https://soundcloud.com/patashu/curse-of-the-patashu
+https://soundcloud.com/patashu/relax-famitracker-original

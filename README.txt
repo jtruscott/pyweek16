@@ -1,4 +1,4 @@
-Your Game Title
+...As Was Foretold
 ===============
 
 Entry in PyWeek #16  <http://www.pyweek.org/16/>
@@ -13,9 +13,12 @@ Running the Game
 
 On Windows or Mac OS X, locate the "run_game.pyw" file and double-click it.
 
-Othewise open a terminal / console and "cd" to the game directory and run:
+Otherwise open a terminal / console and "cd" to the game directory and run:
 
   python run_game.py
+
+If you're using a system that doesn't support MP3 music, or just don't want
+sounds, run "python run_game.py --no-sound" instead.
 
 
 How to Play the Game

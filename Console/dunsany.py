@@ -67,7 +67,7 @@ class PretentiousPullQuote(object):
         self.credits_text = pytality.buffer.RichText(
             "<DARKGREY>  Game By: Jesse Truscott & Joe Gracyk" +
             "                     Art: Devin Vance" +
-            "                    Writing: Dylan Pedersen" +
+            "                     Dialog: Dylan Pedersen" +
             "                     Music: Patashu "
         )
 

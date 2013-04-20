@@ -1,4 +1,0 @@
-title=Console
-author=yourgameauthor
-api=1
-orientation=landscape
