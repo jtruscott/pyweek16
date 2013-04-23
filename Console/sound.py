@@ -2,11 +2,15 @@ import os
 import pytality
 import pygame
 import event
+import sys
 import logging
 
 log = logging.getLogger(__name__)
 
-data_dir = os.path.join(os.path.dirname(__file__), '..', 'data', 'music')
+if hasattr(sys, 'frozen'):
+    data_dir = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])), 'data', 'music')
+else:
+    data_dir = os.path.join(os.path.dirname(__file__), '..', 'data', 'music')
 
 last_sound = None
 no_sound = False

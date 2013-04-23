@@ -1,5 +1,6 @@
 import os
 import pygame
+import sys
 import threading, time
 from pygame.locals import *
 
@@ -41,7 +42,10 @@ key_map = {
 
 #image path
 #todo: figure out how I want to make this configurable
-base_path = os.path.join(os.path.dirname(__file__), 'silverlight_html', 'images')
+if hasattr(sys, 'frozen'):
+    base_path = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])), 'data')
+else:
+    base_path = os.path.join(os.path.dirname(__file__), 'silverlight_html', 'images')
 
 #pixel dimensions of each cell
 W = 8
@@ -79,7 +83,7 @@ class CursorThread(threading.Thread):
 
 def init(use_cp437=True, blink=False):
     pygame.init()
-    
+
     #There are several kinds of event we are patently not interested in
     pygame.event.set_blocked([
         MOUSEBUTTONUP,
@@ -98,7 +102,7 @@ def init(use_cp437=True, blink=False):
 
     #spawn a blinky-cursor manager
     global cursor_thread, replaced_character, cursor_x, cursor_y, cursor_type
-    
+
     cursor_x = 0
     cursor_y = 0
     replaced_character = None
@@ -113,12 +117,12 @@ def load_sprites():
     if 'bg' in sprites:
         #we only need to load once
         return
-    
+
     def load_image(key_name, *filepath):
         full_path = os.path.join(base_path, *filepath)
         surface = pygame.image.load(full_path).convert_alpha()
         sprites[key_name] = surface
-    
+
     load_image('bg', 'colors.png')
     for color_id in range(16):
         load_image(color_id, 'char', '%s.png' % color_id)
@@ -183,7 +187,7 @@ def flip():
 def clear():
     if quit:
         return
-    
+
     screen.fill((0, 0, 0))
 
     global cell_data
@@ -200,7 +204,7 @@ def resize(width, height):
     screen = pygame.display.set_mode((width*W, height*H))
     #we don't use alpha, and turning it off makes it a tad faster
     screen.set_alpha(None)
-    
+
     #load the console images to blit later
     load_sprites()
 
@@ -210,8 +214,8 @@ def resize(width, height):
 
     clear()
     flip()
-        
-    
+
+
 def reset():
     pygame.display.quit()
     global quit
@@ -279,14 +283,14 @@ def blit_at(x, y, fg, bg, ch):
     except KeyError:
         #make a new one
         cell_sprite = cache_sprite(fg, bg, ch)
-    
+
     #blit the cell to the screen
     screen.blit(cell_sprite, dest=(screen_x, screen_y))
-    
-    
-        
 
-   
+
+
+
+
 def draw_buffer(source, start_x, start_y):
     """
         render the buffer to our backing.
@@ -295,7 +299,7 @@ def draw_buffer(source, start_x, start_y):
     """
 
     y = start_y
-    
+
     #lookups we can cache into locals
     #i know, it's such a microoptimization, but this path qualifies as hot
     local_cell_data, local_sprites, local_screen = cell_data, sprites, screen
@@ -332,13 +336,13 @@ def draw_buffer(source, start_x, start_y):
                     except KeyError:
                         #make a new one
                         cell_sprite = cache_sprite(fg, bg, ch)
-                    
+
                     #blit the cell to the screen
                     local_screen.blit(cell_sprite, dest=(x*local_W, y*local_H))
 
                     #remember the info for the cache
                     local_cell_data[y][x] = new_data
-                
+
             x += 1
             w += 1
         y += 1
@@ -411,7 +415,7 @@ def prepare_raw_getkey():
                         else:
                             items.append(item)
                             break
-                    
+
                     for ignored_item in ignored_items:
                         pygame.event.post(ignored_item)
 
